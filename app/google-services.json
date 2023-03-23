@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "808248122767",
+    "project_id": "jetfit-396df",
+    "storage_bucket": "jetfit-396df.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:808248122767:android:4884649cba84ea920d3ffa",
+        "android_client_info": {
+          "package_name": "com.example.jetfit"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "808248122767-iav6hrivrf5em2br4alme1plhaqjjt5u.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyClqLSYq34iqm3K_E3lADTNW3Y-0XDYocI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "808248122767-iav6hrivrf5em2br4alme1plhaqjjt5u.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
