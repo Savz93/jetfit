@@ -2,20 +2,31 @@ package com.example.jetfit.ui.screen
 
 import android.util.Log
 import android.widget.Toast
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.width
-import androidx.compose.material.ButtonDefaults
-import androidx.compose.material.OutlinedButton
-import androidx.compose.material.OutlinedTextField
-import androidx.compose.material.Text
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusDirection
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
+import com.example.jetfit.ui.Colors
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
@@ -26,49 +37,126 @@ fun CreateAccountScreen() {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
+    var passwordVisible by rememberSaveable { mutableStateOf(false) }
     val context = LocalContext.current
+
+    val focusManager = LocalFocusManager.current
 
     val auth: FirebaseAuth = Firebase.auth
 
+    Column (
+        modifier = Modifier
+            .fillMaxSize()
+            .background(
+                Brush.linearGradient(
+                    listOf(Colors.lightBlue, Colors.middleBlue)
+                )
+            ),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Top) {
 
-    ConstraintLayout(modifier = Modifier.fillMaxSize()) {
-        val (emailField, passwordField, confirmPasswordField, createAccountButton) = createRefs()
-
+        Spacer(modifier = Modifier.height(200.dp))
 
         OutlinedTextField(
             value = email,
             onValueChange = { email = it },
-            modifier = Modifier.constrainAs(emailField) {
-                top.linkTo(parent.top, 24.dp)
-                start.linkTo(parent.start, 16.dp)
-                end.linkTo(parent.end, 16.dp)
-            },
-            placeholder = { Text(text = "Email") },
-            label = { Text(text = "Email") })
+            keyboardOptions = KeyboardOptions.Default.copy(
+                imeAction = ImeAction.Done
+            ),
+            keyboardActions = KeyboardActions(
+                onDone = {
+                    focusManager.moveFocus(
+                        focusDirection = FocusDirection.Next
+                    )
+                }
+            ),
+            colors = TextFieldDefaults.outlinedTextFieldColors(
+                focusedBorderColor = Color.White,
+                unfocusedBorderColor = Color.LightGray,
+                textColor = Color.White,
+                cursorColor = Color.White,
+                focusedLabelColor = Color.White
+            ),
+            placeholder = { Text(text = "email") },
+            singleLine = true,
+            label = { Text(text = "email") })
+
+        Spacer(modifier = Modifier.height(24.dp))
+
 
         OutlinedTextField(
             value = password,
             onValueChange = { password = it },
-            modifier = Modifier.constrainAs(passwordField) {
-                top.linkTo(emailField.bottom, 24.dp)
-                start.linkTo(parent.start, 16.dp)
-                end.linkTo(parent.end, 16.dp)
-            },
-            placeholder = { Text("Password") },
-            label = { Text(text = "Password") }
+            visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+            keyboardOptions = KeyboardOptions.Default.copy(
+                imeAction = ImeAction.Done
+            ),
+            keyboardActions = KeyboardActions(
+                onDone = {
+                    focusManager.moveFocus(
+                        focusDirection = FocusDirection.Next
+                    )
+                }
+            ),
+            colors = TextFieldDefaults.outlinedTextFieldColors(
+                focusedBorderColor = Color.White,
+                unfocusedBorderColor = Color.LightGray,
+                textColor = Color.White,
+                cursorColor = Color.White,
+                focusedLabelColor = Color.White
+            ),
+            singleLine = true,
+            placeholder = { Text("password") },
+            label = { Text(text = "password") },
+            trailingIcon = {
+                val image = if (passwordVisible)
+                    Icons.Filled.Visibility
+                else Icons.Filled.VisibilityOff
+                val description = if (passwordVisible) "Hide password" else "Show password"
+
+                IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                    Icon(imageVector = image, description)
+                }
+            }
         )
+
+        Spacer(modifier = Modifier.height(24.dp))
 
         OutlinedTextField(
             value = confirmPassword,
             onValueChange = { confirmPassword = it },
-            modifier = Modifier.constrainAs(confirmPasswordField) {
-                top.linkTo(passwordField.bottom, 24.dp)
-                start.linkTo(parent.start, 16.dp)
-                end.linkTo(parent.end, 16.dp)
-            },
-            placeholder = { Text("Confirm Password") },
-            label = { Text(text = "Confirm Password") }
+            visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+            keyboardOptions = KeyboardOptions.Default.copy(
+                imeAction = ImeAction.Done
+            ),
+            keyboardActions = KeyboardActions(
+                onDone = {
+                    focusManager.clearFocus()
+                }
+            ),
+            colors = TextFieldDefaults.outlinedTextFieldColors(
+                focusedBorderColor = Color.White,
+                unfocusedBorderColor = Color.LightGray,
+                textColor = Color.White,
+                cursorColor = Color.White,
+                focusedLabelColor = Color.White
+            ),
+            singleLine = true,
+            placeholder = { Text("confirm password") },
+            label = { Text(text = "confirm password") },
+            trailingIcon = {
+                val image = if (passwordVisible)
+                    Icons.Filled.Visibility
+                else Icons.Filled.VisibilityOff
+                val description = if (passwordVisible) "Hide password" else "Show password"
+
+                IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                    Icon(imageVector = image, description)
+                }
+            }
         )
+
+        Spacer(modifier = Modifier.height(40.dp))
 
         OutlinedButton(
             onClick = {
@@ -84,11 +172,6 @@ fun CreateAccountScreen() {
                 }
             },
             modifier = Modifier
-                .constrainAs(createAccountButton) {
-                    top.linkTo(confirmPasswordField.bottom, 40.dp)
-                    start.linkTo(parent.start, 16.dp)
-                    end.linkTo(parent.end, 16.dp)
-                }
                 .width(250.dp)
                 .height(50.dp),
             colors = ButtonDefaults.buttonColors(backgroundColor = Color.Blue)
@@ -96,7 +179,11 @@ fun CreateAccountScreen() {
             Text(text = "Create Account", color = Color.White, fontSize = 24.sp)
         }
 
-
     }
 }
 
+@Preview(showBackground = true)
+@Composable
+fun PreviewCreateAccountScreen() {
+    CreateAccountScreen()
+}

@@ -1,19 +1,34 @@
 package com.example.jetfit.ui.screen
 
 import android.widget.Toast
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.relocation.BringIntoViewRequester
+import androidx.compose.foundation.relocation.bringIntoViewRequester
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusDirection
+import androidx.compose.ui.focus.onFocusEvent
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -21,29 +36,33 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.jetfit.ui.Colors
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun LoginScreen(navController: NavController) {
 
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+    var passwordVisible by rememberSaveable { mutableStateOf(false) }
     val context = LocalContext.current
 
-    ConstraintLayout(
+    val focusManager = LocalFocusManager.current
+
+    Column (
         modifier = Modifier
             .fillMaxSize()
             .background(
                 Brush.linearGradient(
-                    listOf(Colors.lightBlue, Colors.middleBlue, Colors.darkBlue))
-            )) {
-        val (appNameText, emailField, passwordField, loginButton, createAccount) = createRefs()
+                    listOf(Colors.lightBlue, Colors.middleBlue)
+                )
+            ),
+        horizontalAlignment = Alignment.CenterHorizontally) {
+
+        Spacer(modifier = Modifier.height(140.dp))
 
         Text(
-            modifier = Modifier.constrainAs(appNameText) {
-                top.linkTo(parent.top, margin = 160.dp)
-                start.linkTo(parent.start)
-                end.linkTo(parent.end)
-            },
             text = "JetFit",
             fontSize = 64.sp,
             fontStyle = FontStyle.Normal,
@@ -51,61 +70,97 @@ fun LoginScreen(navController: NavController) {
             color = Color.Blue
         )
 
+        Spacer(modifier = Modifier.height(100.dp))
+
         OutlinedTextField(
+            modifier = Modifier,
             value = email,
             onValueChange = { email = it },
-            modifier = Modifier.constrainAs(emailField) {
-                top.linkTo(appNameText.bottom, 200.dp)
-                start.linkTo(parent.start, 16.dp)
-                end.linkTo(parent.end, 16.dp)
-            },
-            placeholder = { Text(text = "Email") },
-            label = { Text(text = "Email") })
+            keyboardOptions = KeyboardOptions.Default.copy(
+                imeAction = ImeAction.Done
+            ),
+            keyboardActions = KeyboardActions(
+                onDone = {
+                    focusManager.moveFocus(
+                        focusDirection = FocusDirection.Next
+                    )
+                }
+            ),
+            colors = TextFieldDefaults.outlinedTextFieldColors(
+                focusedBorderColor = Color.White,
+                unfocusedBorderColor = Color.LightGray,
+                textColor = Color.White,
+                cursorColor = Color.White,
+                focusedLabelColor = Color.White
+            ),
+            singleLine = true,
+            placeholder = { Text(text = "email") },
+            label = { Text(text = "email") })
+
+        Spacer(modifier = Modifier.height(24.dp))
 
         OutlinedTextField(
+            modifier = Modifier,
             value = password,
             onValueChange = { password = it },
-            modifier = Modifier.constrainAs(passwordField) {
-                top.linkTo(emailField.bottom, 24.dp)
-                start.linkTo(parent.start, 16.dp)
-                end.linkTo(parent.end, 16.dp)
-            },
-            placeholder = { Text("Password") },
-            label = { Text(text = "Password") }
+            visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+            keyboardOptions = KeyboardOptions (
+                keyboardType = KeyboardType.Password,
+                imeAction = ImeAction.Done
+            ),
+            keyboardActions = KeyboardActions(
+                onDone = {
+                    focusManager.clearFocus()
+                }
+            ),
+            colors = TextFieldDefaults.outlinedTextFieldColors(
+                cursorColor = Color.White,
+                textColor = Color.White,
+                focusedBorderColor = Color.White,
+                unfocusedBorderColor = Color.LightGray,
+                focusedLabelColor = Color.White
+            ),
+            singleLine = true,
+            placeholder = { Text("password") },
+            label = { Text(text = "password") },
+            trailingIcon = {
+                val image = if (passwordVisible)
+                    Icons.Filled.Visibility
+                else Icons.Filled.VisibilityOff
+                val description = if (passwordVisible) "Hide password" else "Show password"
+
+                IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                    Icon(imageVector = image, description)
+                }
+            }
         )
 
+        Spacer(modifier = Modifier.height(40.dp))
+
         OutlinedButton(
+            modifier = Modifier
+                .width(250.dp)
+                .height(50.dp),
             onClick = {
                 Toast
                     .makeText(context, "You Clicked Login Button!", Toast.LENGTH_SHORT)
                     .show()
             },
-            modifier = Modifier
-                .constrainAs(loginButton) {
-                    start.linkTo(parent.start, 16.dp)
-                    end.linkTo(parent.end, 16.dp)
-                    bottom.linkTo(createAccount.top, 120.dp)
-                }
-                .width(250.dp)
-                .height(50.dp),
             colors = ButtonDefaults.buttonColors(backgroundColor = Color.Blue)
-            ) {
-            Text(text = "Login", color = Color.White, fontSize = 24.sp)
+        ) {
+            Text(text = "Login", color = Color.LightGray, fontSize = 24.sp)
         }
+
+        Spacer(modifier = Modifier.height(50.dp))
 
         Text(
             modifier = Modifier
-                .constrainAs(createAccount) {
-                    start.linkTo(parent.start)
-                    end.linkTo(parent.end)
-                    bottom.linkTo(parent.bottom, 16.dp)
-                }
                 .clickable {
                     navController.navigate(Screen.CreateAccountScreen.route)
                 },
             text ="Create Account",
             fontSize = 20.sp,
-            color = Color.Blue
+            color = Color.LightGray
         )
 
     }
