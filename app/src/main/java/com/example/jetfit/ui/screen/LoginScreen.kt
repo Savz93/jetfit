@@ -1,9 +1,7 @@
 package com.example.jetfit.ui.screen
 
 import android.widget.Toast
-import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.relocation.BringIntoViewRequester
 import androidx.compose.foundation.relocation.bringIntoViewRequester
@@ -16,13 +14,16 @@ import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.focus.onFocusEvent
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -33,13 +34,14 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
+import androidx.core.view.WindowCompat
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.jetfit.ui.Colors
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalFoundationApi::class)
+@OptIn(ExperimentalFoundationApi::class, ExperimentalComposeUiApi::class)
 @Composable
 fun LoginScreen(navController: NavController) {
 
@@ -48,6 +50,8 @@ fun LoginScreen(navController: NavController) {
     var passwordVisible by rememberSaveable { mutableStateOf(false) }
     val context = LocalContext.current
 
+    val coroutineScope = rememberCoroutineScope()
+    val bringIntoViewRequester = remember { BringIntoViewRequester() }
     val focusManager = LocalFocusManager.current
 
     Column (
@@ -73,16 +77,23 @@ fun LoginScreen(navController: NavController) {
         Spacer(modifier = Modifier.height(100.dp))
 
         OutlinedTextField(
-            modifier = Modifier,
+            modifier = Modifier
+                .onFocusEvent {
+                if (it.isFocused) {
+                    coroutineScope.launch {
+                        bringIntoViewRequester.bringIntoView()
+                    }
+                }
+            },
             value = email,
             onValueChange = { email = it },
-            keyboardOptions = KeyboardOptions.Default.copy(
-                imeAction = ImeAction.Done
+            keyboardOptions = KeyboardOptions(
+                imeAction = ImeAction.Next
             ),
             keyboardActions = KeyboardActions(
-                onDone = {
+                onNext = {
                     focusManager.moveFocus(
-                        focusDirection = FocusDirection.Next
+                        focusDirection = FocusDirection.Down
                     )
                 }
             ),
@@ -95,16 +106,27 @@ fun LoginScreen(navController: NavController) {
             ),
             singleLine = true,
             placeholder = { Text(text = "email") },
-            label = { Text(text = "email") })
+            label = { Text(text = "email") }
+        )
 
-        Spacer(modifier = Modifier.height(24.dp))
+
+        Spacer(Modifier.height(24.dp))
 
         OutlinedTextField(
-            modifier = Modifier,
+            modifier = Modifier
+                .bringIntoViewRequester(bringIntoViewRequester)
+                .onFocusEvent {
+                    if (it.isFocused) {
+                        coroutineScope.launch {
+                            bringIntoViewRequester.bringIntoView()
+                        }
+                    }
+                }
+                .padding(bottom = 16.dp),
             value = password,
             onValueChange = { password = it },
             visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-            keyboardOptions = KeyboardOptions (
+            keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Password,
                 imeAction = ImeAction.Done
             ),

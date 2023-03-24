@@ -21,15 +21,15 @@ import androidx.navigation.compose.rememberNavController
 import com.example.jetfit.navigation.MyAppNavHost
 import com.example.jetfit.ui.screen.LoginScreen
 import com.example.jetfit.ui.theme.JetFitTheme
+import com.google.firebase.auth.FirebaseAuth
 
 class MainActivity : ComponentActivity() {
 
     lateinit var navController: NavHostController
+    private lateinit var auth: FirebaseAuth
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        WindowCompat.setDecorFitsSystemWindows(window, false)
-
         setContent {
             JetFitTheme {
                 navController = rememberNavController()
@@ -37,13 +37,14 @@ class MainActivity : ComponentActivity() {
             }
         }
 
+        WindowCompat.setDecorFitsSystemWindows(window, false)
 
+//        ViewCompat.setOnApplyWindowInsetsListener(findViewById(android.R.id.content)) { view, insets ->
+//            val bottom = insets.getInsets(WindowInsetsCompat.Type.ime()).bottom
+//            view.updatePadding(bottom = bottom)
+//            insets
+//        }
 
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(android.R.id.content)) { view, insets ->
-            val bottom = insets.getInsets(WindowInsetsCompat.Type.ime()).bottom
-            view.updatePadding(bottom = bottom)
-            insets
-        }
     }
 }
 

@@ -25,7 +25,6 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.constraintlayout.compose.ConstraintLayout
 import com.example.jetfit.ui.Colors
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
@@ -34,15 +33,15 @@ import com.google.firebase.ktx.Firebase
 @Composable
 fun CreateAccountScreen() {
 
-    var email by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
+    var userEmail by remember { mutableStateOf("") }
+    var userPassword by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
     var passwordVisible by rememberSaveable { mutableStateOf(false) }
     val context = LocalContext.current
 
-    val focusManager = LocalFocusManager.current
+    val auth: FirebaseAuth = FirebaseAuth.getInstance()
 
-    val auth: FirebaseAuth = Firebase.auth
+    val focusManager = LocalFocusManager.current
 
     Column (
         modifier = Modifier
@@ -58,8 +57,8 @@ fun CreateAccountScreen() {
         Spacer(modifier = Modifier.height(200.dp))
 
         OutlinedTextField(
-            value = email,
-            onValueChange = { email = it },
+            value = userEmail,
+            onValueChange = { userEmail = it },
             keyboardOptions = KeyboardOptions.Default.copy(
                 imeAction = ImeAction.Done
             ),
@@ -85,8 +84,8 @@ fun CreateAccountScreen() {
 
 
         OutlinedTextField(
-            value = password,
-            onValueChange = { password = it },
+            value = userPassword,
+            onValueChange = { userPassword = it },
             visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
             keyboardOptions = KeyboardOptions.Default.copy(
                 imeAction = ImeAction.Done
@@ -160,13 +159,17 @@ fun CreateAccountScreen() {
 
         OutlinedButton(
             onClick = {
-                if (password.length > 7 && password == confirmPassword) {
-                    auth.createUserWithEmailAndPassword(email, password)
-                    Toast.makeText(
-                        context,
-                        "Success, you have made an account!",
-                        Toast.LENGTH_SHORT
-                    ).show()
+                if (userPassword.length > 7 && userPassword == confirmPassword && userEmail.isNotEmpty()) {
+                    auth.createUserWithEmailAndPassword(userEmail, userPassword)
+                        .addOnCompleteListener { task ->
+                            if (task.isSuccessful) {
+                                Log.d("TAG", "createUserWithEmail:success")
+                                Toast.makeText(context, "Success, you have made an account!", Toast.LENGTH_SHORT).show()
+                            } else {
+                                Log.w("TAG", "${task.exception.toString()}")
+                                Toast.makeText(context, task.exception.toString(), Toast.LENGTH_SHORT).show()
+                            }
+                        }
                 } else {
                     Toast.makeText(context, "Password is either too short or does not match", Toast.LENGTH_SHORT).show()
                 }
