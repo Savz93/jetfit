@@ -1,5 +1,6 @@
 package com.example.jetfit.ui.screen
 
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
@@ -16,9 +17,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.FocusDirection
-import androidx.compose.ui.focus.onFocusChanged
-import androidx.compose.ui.focus.onFocusEvent
+import androidx.compose.ui.focus.*
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -38,8 +37,8 @@ import androidx.core.view.WindowCompat
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.jetfit.ui.Colors
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
+
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalComposeUiApi::class)
 @Composable
@@ -54,19 +53,23 @@ fun LoginScreen(navController: NavController) {
     val bringIntoViewRequester = remember { BringIntoViewRequester() }
     val focusManager = LocalFocusManager.current
 
-    Column (
+    ConstraintLayout (
         modifier = Modifier
             .fillMaxSize()
             .background(
                 Brush.linearGradient(
                     listOf(Colors.lightBlue, Colors.middleBlue)
                 )
-            ),
-        horizontalAlignment = Alignment.CenterHorizontally) {
+            )) {
+        val (appText, emailField, passwordField, loginButton, createAccountText) = createRefs()
 
-        Spacer(modifier = Modifier.height(140.dp))
-
+        // App Name Text
         Text(
+            modifier = Modifier.constrainAs(appText) {
+                top.linkTo(parent.top, 140.dp)
+                start.linkTo(parent.start)
+                end.linkTo(parent.end)
+            },
             text = "JetFit",
             fontSize = 64.sp,
             fontStyle = FontStyle.Normal,
@@ -74,24 +77,32 @@ fun LoginScreen(navController: NavController) {
             color = Color.Blue
         )
 
-        Spacer(modifier = Modifier.height(100.dp))
-
+        // Email Login
         OutlinedTextField(
             modifier = Modifier
-                .onFocusEvent {
-                if (it.isFocused) {
-                    coroutineScope.launch {
-                        bringIntoViewRequester.bringIntoView()
+                .onFocusEvent { event ->
+                    if (event.isFocused) {
+                        coroutineScope.launch {
+                            if (this.coroutineContext.isActive) {
+                                bringIntoViewRequester.bringIntoView()
+                                Toast.makeText(context, "Email Active", Toast.LENGTH_SHORT).show()
+                            }
+                        }
                     }
                 }
-            },
+                .constrainAs(emailField) {
+                    top.linkTo(appText.bottom, 140.dp)
+                    start.linkTo(parent.start)
+                    end.linkTo(parent.end)
+                },
             value = email,
             onValueChange = { email = it },
             keyboardOptions = KeyboardOptions(
-                imeAction = ImeAction.Next
+                imeAction = ImeAction.Done,
+                keyboardType = KeyboardType.Email
             ),
             keyboardActions = KeyboardActions(
-                onNext = {
+                onDone = {
                     focusManager.moveFocus(
                         focusDirection = FocusDirection.Down
                     )
@@ -109,20 +120,26 @@ fun LoginScreen(navController: NavController) {
             label = { Text(text = "email") }
         )
 
-
-        Spacer(Modifier.height(24.dp))
-
+        // Password Login
         OutlinedTextField(
             modifier = Modifier
                 .bringIntoViewRequester(bringIntoViewRequester)
-                .onFocusEvent {
-                    if (it.isFocused) {
+                .onFocusEvent { event ->
+                    if(event.isFocused) {
                         coroutineScope.launch {
-                            bringIntoViewRequester.bringIntoView()
+                            if (this.coroutineContext.isActive) {
+                                bringIntoViewRequester.bringIntoView()
+                                Toast.makeText(context, "Password Active", Toast.LENGTH_SHORT).show()
+                            }
+
                         }
                     }
                 }
-                .padding(bottom = 16.dp),
+                .constrainAs(passwordField) {
+                    top.linkTo(emailField.bottom, 16.dp)
+                    start.linkTo(parent.start)
+                    end.linkTo(parent.end)
+                },
             value = password,
             onValueChange = { password = it },
             visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
@@ -157,10 +174,14 @@ fun LoginScreen(navController: NavController) {
             }
         )
 
-        Spacer(modifier = Modifier.height(40.dp))
-
+        // Button Login
         OutlinedButton(
             modifier = Modifier
+                .constrainAs(loginButton) {
+                    top.linkTo(passwordField.bottom, 30.dp)
+                    start.linkTo(parent.start)
+                    end.linkTo(parent.end)
+                }
                 .width(250.dp)
                 .height(50.dp),
             onClick = {
@@ -173,17 +194,22 @@ fun LoginScreen(navController: NavController) {
             Text(text = "Login", color = Color.LightGray, fontSize = 24.sp)
         }
 
-        Spacer(modifier = Modifier.height(50.dp))
-
+        // Create Account Text
         Text(
             modifier = Modifier
+                .constrainAs(createAccountText) {
+                    start.linkTo(parent.start)
+                    end.linkTo(parent.end)
+                    bottom.linkTo(parent.bottom, 40.dp)
+                }
                 .clickable {
                     navController.navigate(Screen.CreateAccountScreen.route)
                 },
-            text ="Create Account",
+            text = "Create Account",
             fontSize = 20.sp,
             color = Color.LightGray
         )
+
 
     }
 }

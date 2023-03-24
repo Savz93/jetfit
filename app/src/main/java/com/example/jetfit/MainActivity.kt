@@ -26,7 +26,6 @@ import com.google.firebase.auth.FirebaseAuth
 class MainActivity : ComponentActivity() {
 
     lateinit var navController: NavHostController
-    private lateinit var auth: FirebaseAuth
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -37,7 +36,7 @@ class MainActivity : ComponentActivity() {
             }
         }
 
-        WindowCompat.setDecorFitsSystemWindows(window, false)
+//        WindowCompat.setDecorFitsSystemWindows(window, false)
 
 //        ViewCompat.setOnApplyWindowInsetsListener(findViewById(android.R.id.content)) { view, insets ->
 //            val bottom = insets.getInsets(WindowInsetsCompat.Type.ime()).bottom

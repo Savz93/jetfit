@@ -25,13 +25,17 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import com.example.jetfit.ui.Colors
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 
 @Composable
-fun CreateAccountScreen() {
+fun CreateAccountScreen(
+    navController: NavController
+) {
 
     var userEmail by remember { mutableStateOf("") }
     var userPassword by remember { mutableStateOf("") }
@@ -163,10 +167,11 @@ fun CreateAccountScreen() {
                     auth.createUserWithEmailAndPassword(userEmail, userPassword)
                         .addOnCompleteListener { task ->
                             if (task.isSuccessful) {
+                                navController.navigate(Screen.HomeScreen.route)
                                 Log.d("TAG", "createUserWithEmail:success")
                                 Toast.makeText(context, "Success, you have made an account!", Toast.LENGTH_SHORT).show()
                             } else {
-                                Log.w("TAG", "${task.exception.toString()}")
+                                Log.w("TAG", task.exception.toString())
                                 Toast.makeText(context, task.exception.toString(), Toast.LENGTH_SHORT).show()
                             }
                         }
@@ -188,5 +193,5 @@ fun CreateAccountScreen() {
 @Preview(showBackground = true)
 @Composable
 fun PreviewCreateAccountScreen() {
-    CreateAccountScreen()
+    CreateAccountScreen(rememberNavController())
 }
