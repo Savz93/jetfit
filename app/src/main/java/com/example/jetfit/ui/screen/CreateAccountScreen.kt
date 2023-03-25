@@ -169,10 +169,8 @@ fun CreateAccountScreen(
                             if (task.isSuccessful) {
                                 navController.navigate(Screen.HomeScreen.route)
                                 Log.d("TAG", "createUserWithEmail:success")
-                                Toast.makeText(context, "Success, you have made an account!", Toast.LENGTH_SHORT).show()
                             } else {
                                 Log.w("TAG", task.exception.toString())
-                                Toast.makeText(context, task.exception.toString(), Toast.LENGTH_SHORT).show()
                             }
                         }
                 } else {
@@ -180,7 +178,8 @@ fun CreateAccountScreen(
                 }
             },
             modifier = Modifier
-                .width(250.dp)
+                .fillMaxWidth()
+                .padding(start = 60.dp, end = 60.dp)
                 .height(50.dp),
             colors = ButtonDefaults.buttonColors(backgroundColor = Color.Blue)
         ) {

@@ -37,6 +37,8 @@ import androidx.core.view.WindowCompat
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.jetfit.ui.Colors
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.*
 
 
@@ -47,6 +49,7 @@ fun LoginScreen(navController: NavController) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var passwordVisible by rememberSaveable { mutableStateOf(false) }
+    val auth = Firebase.auth
     val context = LocalContext.current
 
     val coroutineScope = rememberCoroutineScope()
@@ -83,10 +86,7 @@ fun LoginScreen(navController: NavController) {
                 .onFocusEvent { event ->
                     if (event.isFocused) {
                         coroutineScope.launch {
-                            if (this.coroutineContext.isActive) {
-                                bringIntoViewRequester.bringIntoView()
-                                Toast.makeText(context, "Email Active", Toast.LENGTH_SHORT).show()
-                            }
+                            bringIntoViewRequester.bringIntoView()
                         }
                     }
                 }
@@ -127,11 +127,7 @@ fun LoginScreen(navController: NavController) {
                 .onFocusEvent { event ->
                     if(event.isFocused) {
                         coroutineScope.launch {
-                            if (this.coroutineContext.isActive) {
-                                bringIntoViewRequester.bringIntoView()
-                                Toast.makeText(context, "Password Active", Toast.LENGTH_SHORT).show()
-                            }
-
+                            bringIntoViewRequester.bringIntoView()
                         }
                     }
                 }
@@ -182,16 +178,22 @@ fun LoginScreen(navController: NavController) {
                     start.linkTo(parent.start)
                     end.linkTo(parent.end)
                 }
-                .width(250.dp)
-                .height(50.dp),
+                .fillMaxWidth()
+                .height(50.dp)
+                .padding(start = 80.dp, end = 80.dp),
             onClick = {
-                Toast
-                    .makeText(context, "You Clicked Login Button!", Toast.LENGTH_SHORT)
-                    .show()
+                auth.signInWithEmailAndPassword(email, password).addOnCompleteListener {
+                    if (it.isSuccessful) {
+                        val currentUser = auth.currentUser
+                        navController.navigate(Screen.HomeScreen.withArgs(currentUser?.uid ?: ""))
+                    } else {
+                        Toast.makeText(context, "This email and password do not exist", Toast.LENGTH_SHORT).show()
+                    }
+                }
             },
             colors = ButtonDefaults.buttonColors(backgroundColor = Color.Blue)
         ) {
-            Text(text = "Login", color = Color.LightGray, fontSize = 24.sp)
+            Text(text = "Login", color = Color.LightGray, fontSize = 24 .sp)
         }
 
         // Create Account Text
