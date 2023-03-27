@@ -6,12 +6,7 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
-import com.example.jetfit.ui.screen.Screen
-import com.example.jetfit.ui.screen.CreateAccountScreen
-import com.example.jetfit.ui.screen.HomeScreen
-import com.example.jetfit.ui.screen.LoginScreen
-import com.google.firebase.auth.ktx.auth
-import com.google.firebase.ktx.Firebase
+import com.example.jetfit.ui.screen.*
 
 @Composable
 fun MyAppNavHost(
@@ -33,7 +28,10 @@ fun MyAppNavHost(
                 }
             )
         ) { user ->
-            HomeScreen(user = user.arguments?.getString("user")) }
+            HomeScreen(
+//                user = user.arguments?.getString("user"),
+                navController = navController) }
+        composable(Screen.WeightScreen.route) { WeightScreen() }
     }
 
 }

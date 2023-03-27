@@ -62,6 +62,7 @@ fun CreateAccountScreen(
 
         Spacer(modifier = Modifier.height(100.dp))
 
+        // email field
         OutlinedTextField(
             value = email,
             onValueChange = { email = it },
@@ -89,6 +90,7 @@ fun CreateAccountScreen(
         Spacer(modifier = Modifier.height(24.dp))
 
 
+        // password field
         OutlinedTextField(
             modifier = Modifier.onFocusChanged {
                 if (it.isFocused) {
@@ -130,6 +132,7 @@ fun CreateAccountScreen(
             }
         )
 
+        // password rules
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -157,6 +160,7 @@ fun CreateAccountScreen(
 
         Spacer(modifier = Modifier.height(20.dp))
 
+        // Confirm password field
         OutlinedTextField(
             value = confirmPassword,
             onValueChange = { confirmPassword = it },
@@ -191,6 +195,7 @@ fun CreateAccountScreen(
             }
         )
 
+        // passwords match
         if (confirmPassword.trim() == password.trim() && password.isNotEmpty() && confirmPassword.isNotEmpty()) {
             Row(
                 modifier = Modifier
@@ -219,11 +224,12 @@ fun CreateAccountScreen(
 
         Spacer(modifier = Modifier.height(40.dp))
 
+        // Create Account button
         OutlinedButton(
             onClick = {
                 val emailRegex = "^[A-Za-z](.*)([@]{1})(.{1,})(\\.)(.{1,})"
 
-                if (password.length > 7 && password == confirmPassword && emailRegex.toRegex().matches(email)) {
+                if (password.trim().length > 7 && password.trim() == confirmPassword.trim() && emailRegex.toRegex().matches(email.trim())) {
                     auth.createUserWithEmailAndPassword(email, password)
                         .addOnCompleteListener { task ->
                             if (task.isSuccessful) {
@@ -234,11 +240,11 @@ fun CreateAccountScreen(
                             }
                         }
                 } else {
-                    if (password.length <= 7) {
+                    if (password.trim().length <= 7) {
                         Toast.makeText(context, "Password not long enough", Toast.LENGTH_SHORT).show()
-                    } else if (password != confirmPassword) {
+                    } else if (password.trim() != confirmPassword.trim()) {
                         Toast.makeText(context, "Passwords are not the same", Toast.LENGTH_SHORT).show()
-                    } else if (!emailRegex.toRegex().matches(email)) {
+                    } else if (!emailRegex.toRegex().matches(email.trim())) {
                         Toast.makeText(context, "Email is not formatted correctly", Toast.LENGTH_SHORT).show()
                     } else {
                         Toast.makeText(context, "Unknown Error", Toast.LENGTH_SHORT).show()
