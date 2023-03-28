@@ -3,6 +3,7 @@ package com.example.jetfit
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
@@ -21,17 +22,20 @@ import androidx.navigation.compose.rememberNavController
 import com.example.jetfit.navigation.MyAppNavHost
 import com.example.jetfit.ui.screen.LoginScreen
 import com.example.jetfit.ui.theme.JetFitTheme
+import com.google.accompanist.navigation.animation.AnimatedComposeNavigator
+import com.google.accompanist.navigation.animation.rememberAnimatedNavController
 import com.google.firebase.auth.FirebaseAuth
 
 class MainActivity : ComponentActivity() {
 
     lateinit var navController: NavHostController
 
+    @OptIn(ExperimentalAnimationApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
             JetFitTheme {
-                navController = rememberNavController()
+                navController = rememberAnimatedNavController()
                 MyApp(navController)
             }
         }
