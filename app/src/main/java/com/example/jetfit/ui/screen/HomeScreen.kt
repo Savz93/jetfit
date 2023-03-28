@@ -7,18 +7,22 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.EmojiFoodBeverage
-import androidx.compose.material.icons.filled.Fastfood
-import androidx.compose.material.icons.filled.FoodBank
-import androidx.compose.material.icons.filled.NoFood
+import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Outline
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
@@ -26,6 +30,7 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.jetfit.R
 import com.example.jetfit.ui.Colors
+import kotlinx.coroutines.launch
 
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 @Composable
@@ -33,8 +38,9 @@ fun HomeScreen(navController: NavController) {
 
     val scaffoldState = rememberScaffoldState(
     rememberDrawerState(
-        DrawerValue.Open
+        DrawerValue.Closed
     ))
+    val coroutineScope = rememberCoroutineScope()
 
     Scaffold(
         scaffoldState = scaffoldState,
@@ -43,23 +49,103 @@ fun HomeScreen(navController: NavController) {
             title = { HomeScreenTitle() },
             backgroundColor = Colors.middleBlue,
             contentColor = Color.White,
-            elevation = 16.dp
+            elevation = 16.dp,
+            navigationIcon = {
+                IconButton(onClick = {
+                    coroutineScope.launch {
+                        scaffoldState.drawerState.open()
+                    }
+                }) {
+                    Icon(
+                        imageVector = Icons.Default.Menu,
+                        contentDescription = "Menu Icon",
+                        tint = Color.White
+                    )
+                }
+            }
         )},
         content = { HomeScreenContent(user = "Adam", navController = navController) },
         bottomBar = { BottomAppBar(backgroundColor = Colors.middleBlue) {
 
-        } }
+        } },
+        drawerContent = { DrawerContentHomeScreen() },
+        drawerShape = customShape(),
+        drawerBackgroundColor = Color.LightGray,
+        drawerElevation = 8.dp,
+        drawerContentColor = Colors.darkBlue
         )
+}
+
+@Composable
+fun DrawerContentHomeScreen() {
+    Column(
+        modifier = Modifier.padding(start = 12.dp)
+    ) {
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Start
+        ) {
+            Icon(
+                imageVector = Icons.Default.Settings,
+                contentDescription = "Settings Icon")
+
+            Spacer(modifier = Modifier.width(16.dp))
+
+            Text(
+                text = "Settings",
+                fontSize = 24.sp
+            )
+        }
+
+        Spacer(modifier = Modifier.height(8.dp))
+        
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Start
+        ) {
+            Icon(
+                imageVector = Icons.Default.Info,
+                contentDescription = "About Icon")
+
+            Spacer(modifier = Modifier.width(16.dp))
+
+            Text(
+                text = "About",
+                fontSize = 24.sp)
+        }
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Start
+        ) {
+            Icon(
+                imageVector = Icons.Default.Logout,
+                contentDescription = "About Icon")
+
+            Spacer(modifier = Modifier.width(16.dp))
+
+            Text(
+                text = "Logout",
+                fontSize = 24.sp)
+        }
+    }
 }
 
 @Composable
 fun HomeScreenTitle() {
     Row(
-        modifier = Modifier.fillMaxSize(),
-        horizontalArrangement = Arrangement.Center,
+        modifier = Modifier.fillMaxSize().padding(start = 90.dp),
+        horizontalArrangement = Arrangement.Start,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(text = "Home", fontSize = 30.sp)
+        Text(
+            text = "Home",
+            fontSize = 30.sp
+        )
     }
 }
 @Composable
@@ -233,9 +319,16 @@ fun HomeScreenContent(
             }
         }
     }
+}
 
-
-
+fun customShape() =  object : Shape {
+    override fun createOutline(
+        size: Size,
+        layoutDirection: LayoutDirection,
+        density: Density
+    ): Outline {
+        return Outline.Rectangle(Rect(0f,0f,500f, 500f))
+    }
 
 }
 

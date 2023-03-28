@@ -20,16 +20,16 @@ fun MyAppNavHost(
         composable(Screen.LoginScreen.route) { LoginScreen(navController) }
         composable(Screen.CreateAccountScreen.route) { CreateAccountScreen(navController) }
         composable(
-            route = Screen.HomeScreen.route + "/{user}",
-            arguments = listOf(
-                navArgument("user") {
-                type = NavType.StringType
-                nullable = true
-                }
-            )
-        ) { user ->
+            route = Screen.HomeScreen.route // + "/{user}",
+//            arguments = listOf(
+//                navArgument("user") {
+//                type = NavType.StringType
+//                nullable = true
+//                }
+//            )
+        ) { // user ->
             HomeScreen(
-//                user = user.arguments?.getString("user"),
+//              user = user.arguments?.getString("user"),
                 navController = navController) }
         composable(Screen.WeightScreen.route) { WeightScreen() }
     }

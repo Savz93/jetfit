@@ -185,7 +185,7 @@ fun LoginScreen(navController: NavController) {
                 auth.signInWithEmailAndPassword(email, password).addOnCompleteListener {
                     if (it.isSuccessful) {
                         val currentUser = auth.currentUser
-                        navController.navigate(Screen.HomeScreen.withArgs(currentUser?.uid ?: ""))
+                        navController.navigate(Screen.HomeScreen.route)
                     } else {
                         Toast.makeText(context, "This email and password do not exist", Toast.LENGTH_SHORT).show()
                     }
