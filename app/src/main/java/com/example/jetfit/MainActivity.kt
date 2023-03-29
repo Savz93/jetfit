@@ -1,34 +1,28 @@
 package com.example.jetfit
 
+import android.app.Application
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowCompat
-import androidx.core.view.WindowInsetsCompat
-import androidx.core.view.updatePadding
-import androidx.navigation.NavController
-import androidx.navigation.NavHost
+import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
-import androidx.navigation.compose.rememberNavController
+import androidx.room.Room
 import com.example.jetfit.navigation.MyAppNavHost
-import com.example.jetfit.ui.screen.LoginScreen
 import com.example.jetfit.ui.theme.JetFitTheme
-import com.google.accompanist.navigation.animation.AnimatedComposeNavigator
+import com.example.jetfit.userdata.UserRoomDatabase
+import com.example.jetfit.userdata.UserViewModel
+import com.example.jetfit.userdata.UserViewModelFactory
 import com.google.accompanist.navigation.animation.rememberAnimatedNavController
-import com.google.firebase.auth.FirebaseAuth
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
-    lateinit var navController: NavHostController
+    private lateinit var navController: NavHostController
 
     @OptIn(ExperimentalAnimationApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -36,20 +30,14 @@ class MainActivity : ComponentActivity() {
         setContent {
             JetFitTheme {
                 navController = rememberAnimatedNavController()
+
                 MyApp(navController)
             }
         }
-
-//        WindowCompat.setDecorFitsSystemWindows(window, false)
-
-//        ViewCompat.setOnApplyWindowInsetsListener(findViewById(android.R.id.content)) { view, insets ->
-//            val bottom = insets.getInsets(WindowInsetsCompat.Type.ime()).bottom
-//            view.updatePadding(bottom = bottom)
-//            insets
-//        }
-
     }
+
 }
+
 
 @Composable
 fun MyApp(navHostController: NavHostController) {

@@ -12,6 +12,7 @@ import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material.icons.rounded.CheckCircle
 import androidx.compose.runtime.*
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -28,16 +29,23 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import com.example.jetfit.User
 import com.example.jetfit.ui.Colors
+import com.example.jetfit.userdata.UserViewModel
 import com.google.firebase.auth.FirebaseAuth
+
 
 @Composable
 fun CreateAccountScreen(
-    navController: NavController
+    navController: NavController,
+    viewModel: UserViewModel
 ) {
 
+    var firstName by remember { mutableStateOf("") }
+    var lastName by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
@@ -58,9 +66,62 @@ fun CreateAccountScreen(
                 )
             ),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Top) {
+        verticalArrangement = Arrangement.spacedBy(24.dp)
+    ) {
 
-        Spacer(modifier = Modifier.height(100.dp))
+        Spacer(modifier = Modifier.height(40.dp))
+
+        // First Name
+        OutlinedTextField(
+            value = firstName,
+            onValueChange = { firstName = it },
+            keyboardOptions = KeyboardOptions.Default.copy(
+                imeAction = ImeAction.Done
+            ),
+            keyboardActions = KeyboardActions(
+                onDone = {
+                    focusManager.moveFocus(
+                        focusDirection = FocusDirection.Next
+                    )
+                }
+            ),
+            colors = TextFieldDefaults.outlinedTextFieldColors(
+                focusedBorderColor = Color.White,
+                unfocusedBorderColor = Color.LightGray,
+                textColor = Color.White,
+                cursorColor = Color.White,
+                focusedLabelColor = Color.White
+            ),
+            placeholder = { Text(text = "first name") },
+            singleLine = true,
+            label = { Text(text = "first name") }
+        )
+
+        // Last Name
+        OutlinedTextField(
+            value = lastName,
+            onValueChange = { lastName = it },
+            keyboardOptions = KeyboardOptions.Default.copy(
+                imeAction = ImeAction.Done
+            ),
+            keyboardActions = KeyboardActions(
+                onDone = {
+                    focusManager.moveFocus(
+                        focusDirection = FocusDirection.Next
+                    )
+                }
+            ),
+            colors = TextFieldDefaults.outlinedTextFieldColors(
+                focusedBorderColor = Color.White,
+                unfocusedBorderColor = Color.LightGray,
+                textColor = Color.White,
+                cursorColor = Color.White,
+                focusedLabelColor = Color.White
+            ),
+            placeholder = { Text(text = "last name") },
+            singleLine = true,
+            label = { Text(text = "last name") }
+        )
 
         // email field
         OutlinedTextField(
@@ -85,9 +146,10 @@ fun CreateAccountScreen(
             ),
             placeholder = { Text(text = "email") },
             singleLine = true,
-            label = { Text(text = "email") })
+            label = { Text(text = "email") }
+        )
 
-        Spacer(modifier = Modifier.height(24.dp))
+//        Spacer(modifier = Modifier.height(24.dp))
 
 
         // password field
@@ -142,7 +204,9 @@ fun CreateAccountScreen(
             Icon(
                 imageVector = Icons.Rounded.CheckCircle,
                 contentDescription = "Rounded circle icon",
-                modifier = Modifier.padding(top = 3f.dp).size(14.dp),
+                modifier = Modifier
+                    .padding(top = 3f.dp)
+                    .size(14.dp),
                 tint = if (password.length > 7) Colors.green else Color.White
                 )
 
@@ -158,7 +222,7 @@ fun CreateAccountScreen(
         }
 
 
-        Spacer(modifier = Modifier.height(20.dp))
+//        Spacer(modifier = Modifier.height(20.dp))
 
         // Confirm password field
         OutlinedTextField(
@@ -206,7 +270,9 @@ fun CreateAccountScreen(
                 Icon(
                     imageVector = Icons.Rounded.CheckCircle,
                     contentDescription = "Rounded circle icon",
-                    modifier = Modifier.padding(top = 3f.dp).size(14.dp),
+                    modifier = Modifier
+                        .padding(top = 3f.dp)
+                        .size(14.dp),
                     tint = Colors.green
                 )
 
@@ -222,7 +288,9 @@ fun CreateAccountScreen(
             }
         }
 
-        Spacer(modifier = Modifier.height(40.dp))
+//        Spacer(modifier = Modifier.height(40.dp))
+
+        val userViewModel: UserViewModel = viewModel()
 
         // Create Account button
         OutlinedButton(
@@ -233,6 +301,16 @@ fun CreateAccountScreen(
                     auth.createUserWithEmailAndPassword(email, password)
                         .addOnCompleteListener { task ->
                             if (task.isSuccessful) {
+
+                                val currentUser = User (
+                                    firstName = firstName,
+                                    lastName = lastName,
+                                    uid = auth.uid!!,
+                                    email = email
+                                )
+
+                                viewModel.addUser(currentUser)
+
                                 navController.navigate(Screen.HomeScreen.route)
                                 Log.d("TAG", "createUserWithEmail:success")
                             } else {
@@ -263,12 +341,8 @@ fun CreateAccountScreen(
     }
 }
 
-fun passwordRules(email: String, password: String, confirmPassword: String, auth: FirebaseAuth) {
-
-}
-
 @Preview(showBackground = true)
 @Composable
 fun PreviewCreateAccountScreen() {
-    CreateAccountScreen(rememberNavController())
+    CreateAccountScreen(rememberNavController(), viewModel())
 }

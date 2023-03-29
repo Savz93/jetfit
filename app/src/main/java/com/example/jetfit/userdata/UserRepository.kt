@@ -1,5 +1,6 @@
 package com.example.jetfit.userdata
 
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.example.jetfit.User
 import kotlinx.coroutines.CoroutineScope
@@ -8,13 +9,9 @@ import kotlinx.coroutines.launch
 
 class UserRepository(private val userDao: UserDao) {
 
-    val allUsers = MutableLiveData<List<User>>()
-    val foundUser = MutableLiveData<User>()
+    val allUsers: LiveData<List<User>> = userDao.getAllUsers()
     private val coroutineScope = CoroutineScope(Dispatchers.Main)
 
-    fun getAllUsers() {
-        userDao.getAllUsers()
-    }
 
     fun addUser(newUser: User) {
         coroutineScope.launch(Dispatchers.IO) {

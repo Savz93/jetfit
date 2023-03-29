@@ -1,5 +1,6 @@
 package com.example.jetfit.userdata
 
+import androidx.lifecycle.LiveData
 import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert
@@ -11,14 +12,10 @@ import com.example.jetfit.User
 @Dao
 interface UserDao {
 
+    @Query("SELECT * FROM users")
+    fun getAllUsers(): LiveData<List<User>>
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun addUser(user: User)
-
-    @Query("SELECT * FROM users where uid = :uid")
-    fun findUserByUid(uid: String): User
-
-    @Query("SELECT * FROM users")
-    fun getAllUsers(): List<User>
 
     @Update
     suspend fun updateUserDetails(user: User)
