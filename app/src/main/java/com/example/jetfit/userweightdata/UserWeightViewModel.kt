@@ -1,24 +1,45 @@
 package com.example.jetfit.userweightdata
 
+import android.app.Application
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.example.jetfit.User
+import com.example.jetfit.userdata.UserRepository
+import com.example.jetfit.userdata.UserRoomDatabase
+import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 
-class UserWeightViewModel @Inject constructor(private val userWeightRepository: UserWeightRepository): ViewModel() {
+@HiltViewModel
+class UserWeightViewModel @Inject constructor(application: Application): ViewModel() {
 
-    suspend fun getAllUserWeight(): List<UserWeight> {
-        return userWeightRepository.getAllWeights()
+    val allWeights: LiveData<List<UserWeight>>
+    val getUserByUid: MutableLiveData<List<UserWeight>>
+    private val repository: UserWeightRepository
+
+    init {
+        val userWeightDb = UserWeightAndDateRoomDatabase.getInstance(application)
+        val userWeightDao = userWeightDb.userWeightAndDateDao()
+        repository = UserWeightRepository(userWeightDao)
+
+        allWeights = repository.allWeights
+        getUserByUid = repository.findUserByUid
     }
 
-    suspend fun insertUserWeight(userWeight: UserWeight) {
-        userWeightRepository.insertWeight(userWeight)
+    fun insertUserWeight(userWeight: UserWeight) {
+        repository.insertWeight(userWeight)
     }
 
-    suspend fun updateUserWeight(userWeight: UserWeight) {
-        userWeightRepository.updateWeight(userWeight)
+    fun getUserByUid(uid: String) {
+        repository.findUserByUid(uid)
     }
 
-    suspend fun deleteUserWeight(userWeight: UserWeight) {
-        userWeightRepository.deleteWeight(userWeight)
+    fun updateUserWeight(userWeight: UserWeight) {
+        repository.updateWeight(userWeight)
+    }
+
+    fun deleteUserWeight(userWeight: UserWeight) {
+        repository.deleteWeight(userWeight)
     }
 
 }

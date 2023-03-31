@@ -34,7 +34,9 @@ import kotlinx.coroutines.launch
 
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 @Composable
-fun HomeScreen(navController: NavController) {
+fun HomeScreen(
+    user: String?,
+    navController: NavController) {
 
     val scaffoldState = rememberScaffoldState(
     rememberDrawerState(
@@ -64,7 +66,7 @@ fun HomeScreen(navController: NavController) {
                 }
             }
         )},
-        content = { HomeScreenContent(user = "Adam", navController = navController) },
+        content = { HomeScreenContent(user = user, navController = navController) },
         bottomBar = { BottomAppBar(backgroundColor = Colors.middleBlue) {
 
         } },
@@ -335,5 +337,5 @@ fun customShape() =  object : Shape {
 @Preview(showBackground = true)
 @Composable
 fun HomeScreenPreview() {
-    HomeScreen(rememberNavController())
+    HomeScreen("Adam", rememberNavController())
 }

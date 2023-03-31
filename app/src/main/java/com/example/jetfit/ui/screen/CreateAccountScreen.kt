@@ -149,9 +149,6 @@ fun CreateAccountScreen(
             label = { Text(text = "email") }
         )
 
-//        Spacer(modifier = Modifier.height(24.dp))
-
-
         // password field
         OutlinedTextField(
             modifier = Modifier.onFocusChanged {
@@ -198,7 +195,7 @@ fun CreateAccountScreen(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(top = 16.dp, start = 60.dp),
+                .padding(start = 60.dp),
             horizontalArrangement = Arrangement.Start
         ) {
             Icon(
@@ -220,9 +217,6 @@ fun CreateAccountScreen(
                 fontSize = 14.sp
                 )
         }
-
-
-//        Spacer(modifier = Modifier.height(20.dp))
 
         // Confirm password field
         OutlinedTextField(
@@ -264,7 +258,7 @@ fun CreateAccountScreen(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 16.dp, start = 60.dp),
+                    .padding(start = 60.dp),
                 horizontalArrangement = Arrangement.Start
             ) {
                 Icon(
@@ -311,7 +305,7 @@ fun CreateAccountScreen(
 
                                 viewModel.addUser(currentUser)
 
-                                navController.navigate(Screen.HomeScreen.route)
+                                navController.navigate(Screen.HomeScreen.withArgs(currentUser.firstName))
                                 Log.d("TAG", "createUserWithEmail:success")
                             } else {
                                 Log.w("TAG", task.exception.toString())

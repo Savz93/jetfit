@@ -14,8 +14,10 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.example.jetfit.ui.screen.*
 import com.example.jetfit.userdata.UserViewModel
+import com.example.jetfit.userweightdata.UserWeightViewModel
 import com.google.accompanist.navigation.animation.AnimatedComposeNavigator
 import com.google.accompanist.navigation.animation.AnimatedNavHost
+import dagger.hilt.android.lifecycle.HiltViewModel
 
 @Composable
 fun MyAppNavHost(
@@ -26,27 +28,31 @@ fun MyAppNavHost(
         navController = navController,
         startDestination = Screen.LoginScreen.route,
     ) {
-        composable(
-            route = Screen.LoginScreen.route,
-
-            ) { LoginScreen(navController) }
+        composable(route = Screen.LoginScreen.route) {
+            val userViewModel = hiltViewModel<UserViewModel>()
+            LoginScreen(navController, userViewModel) }
         composable(Screen.CreateAccountScreen.route) { backStackEntry ->
             val userViewModel = hiltViewModel<UserViewModel>()
             CreateAccountScreen(navController, userViewModel)
         }
         composable(
-            route = Screen.HomeScreen.route // + "/{user}",
-//            arguments = listOf(
-//                navArgument("user") {
-//                type = NavType.StringType
-//                nullable = true
-//                }
-//            )
-        ) { // user ->
+            route = Screen.HomeScreen.route  + "/{user}",
+            arguments = listOf(
+                navArgument("user") {
+                type = NavType.StringType
+                nullable = true
+                }
+            )
+        ) {  user ->
             HomeScreen(
-//              user = user.arguments?.getString("user"),
-                navController = navController) }
-        composable(Screen.WeightScreen.route) { WeightScreen() }
+                user = user.arguments?.getString("user"),
+                navController = navController
+            ) }
+        composable(Screen.WeightScreen.route) {
+            val userViewModel = hiltViewModel<UserViewModel>()
+            val userWeightViewModel = hiltViewModel<UserWeightViewModel>()
+            WeightScreen(userViewModel, userWeightViewModel)
+        }
     }
 
 }

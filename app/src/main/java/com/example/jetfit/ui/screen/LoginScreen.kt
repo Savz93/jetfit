@@ -34,17 +34,24 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.core.view.WindowCompat
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.jetfit.ui.Colors
+import com.example.jetfit.userdata.UserViewModel
+import com.google.android.gms.common.api.internal.LifecycleActivity
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
+import dagger.hilt.android.ViewModelLifecycle
 import kotlinx.coroutines.*
 
 
-@OptIn(ExperimentalFoundationApi::class, ExperimentalComposeUiApi::class)
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun LoginScreen(navController: NavController) {
+fun LoginScreen(
+    navController: NavController,
+    viewModel: UserViewModel
+) {
 
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -55,6 +62,8 @@ fun LoginScreen(navController: NavController) {
     val coroutineScope = rememberCoroutineScope()
     val bringIntoViewRequester = remember { BringIntoViewRequester() }
     val focusManager = LocalFocusManager.current
+
+
 
     ConstraintLayout (
         modifier = Modifier
@@ -125,7 +134,7 @@ fun LoginScreen(navController: NavController) {
             modifier = Modifier
                 .bringIntoViewRequester(bringIntoViewRequester)
                 .onFocusEvent { event ->
-                    if(event.isFocused) {
+                    if (event.isFocused) {
                         coroutineScope.launch {
                             bringIntoViewRequester.bringIntoView()
                         }
@@ -185,8 +194,15 @@ fun LoginScreen(navController: NavController) {
                 auth.signInWithEmailAndPassword(email, password).addOnCompleteListener {
                     if (it.isSuccessful) {
                         val currentUser = auth.currentUser
-                        navController.navigate(Screen.HomeScreen.route)
+
+                        viewModel.findUserByUid(currentUser!!.uid)
+
+                        viewModel.findUser.observeForever { user ->
+                            navController.navigate(Screen.HomeScreen.withArgs(user.firstName))
+                        }
+
                     } else {
+                        Log.w("TAG", it.exception.toString())
                         Toast.makeText(context, "This email and password do not exist", Toast.LENGTH_SHORT).show()
                     }
                 }
@@ -219,6 +235,6 @@ fun LoginScreen(navController: NavController) {
 @Preview(showBackground = true)
 @Composable
 fun LoginScreenPreview() {
-    LoginScreen(rememberNavController())
+    LoginScreen(rememberNavController(), viewModel = viewModel())
 }
 
