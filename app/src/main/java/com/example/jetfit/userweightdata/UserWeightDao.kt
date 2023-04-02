@@ -11,14 +11,14 @@ import com.example.jetfit.User
 @Dao
 interface UserWeightDao {
 
-    @Query("SELECT * FROM user_weight_and_date")
+    @Query("SELECT * FROM user_weight")
     fun getAllUserWeight(): LiveData<List<UserWeight>>
 
-    @Query("SELECT * FROM user_weight_and_date WHERE uid = :uid")
+    @Query("SELECT * FROM user_weight WHERE uid = :uid")
     fun getUserByUid(uid: String): List<UserWeight>
 
     @Insert
-    fun insertWeight(userWeight: UserWeight)
+    suspend fun insertWeight(userWeight: UserWeight)
 
     @Update
     fun updateWeight(userWeight: UserWeight)

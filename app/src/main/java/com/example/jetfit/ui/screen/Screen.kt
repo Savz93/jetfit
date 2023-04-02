@@ -5,6 +5,7 @@ sealed class Screen(val route: String) {
     object CreateAccountScreen: Screen("create_account_screen")
     object HomeScreen: Screen("home_screen")
     object WeightScreen: Screen("weight_screen")
+    object AlertDialogAddWeight: Screen("add_weight_dialog")
 
     fun withArgs(vararg args: String): String {
         return buildString {

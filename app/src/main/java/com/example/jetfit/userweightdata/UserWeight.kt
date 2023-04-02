@@ -4,7 +4,7 @@ import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
-@Entity(tableName = "user_weight_and_date")
+@Entity(tableName = "user_weight")
 data class UserWeight(
 
     @PrimaryKey(autoGenerate = true)
@@ -18,5 +18,5 @@ data class UserWeight(
     var date: String,
 
     @ColumnInfo(name = "weight")
-    var weight: Int
+    var weight: String
 )

@@ -18,8 +18,8 @@ class UserWeightViewModel @Inject constructor(application: Application): ViewMod
     private val repository: UserWeightRepository
 
     init {
-        val userWeightDb = UserWeightAndDateRoomDatabase.getInstance(application)
-        val userWeightDao = userWeightDb.userWeightAndDateDao()
+        val userWeightDb = UserWeightRoomDatabase.getInstance(application)
+        val userWeightDao = userWeightDb.userWeightDao()
         repository = UserWeightRepository(userWeightDao)
 
         allWeights = repository.allWeights

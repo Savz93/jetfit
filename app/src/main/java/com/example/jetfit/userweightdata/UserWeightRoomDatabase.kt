@@ -6,21 +6,21 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 
 @Database(entities = [UserWeight::class], version = 1)
-abstract class UserWeightAndDateRoomDatabase: RoomDatabase() {
-    abstract fun userWeightAndDateDao(): UserWeightDao
+abstract class UserWeightRoomDatabase: RoomDatabase() {
+    abstract fun userWeightDao(): UserWeightDao
 
     companion object {
-        private var INSTANCE: UserWeightAndDateRoomDatabase? = null
+        private var INSTANCE: UserWeightRoomDatabase? = null
 
-        fun getInstance(context: Context): UserWeightAndDateRoomDatabase {
+        fun getInstance(context: Context): UserWeightRoomDatabase {
             synchronized(this) {
                 var instance = INSTANCE
 
                 if (instance == null) {
                     instance = Room.databaseBuilder(
                         context.applicationContext,
-                        UserWeightAndDateRoomDatabase::class.java,
-                        "user_weight_database"
+                        UserWeightRoomDatabase::class.java,
+                        "user_weight_db"
                     )
                         .fallbackToDestructiveMigration()
                         .build()
