@@ -173,6 +173,7 @@ fun WeightScreenContent(
 ) {
 
     val context = LocalContext.current
+    val auth = Firebase.auth.currentUser
 
     Column(
         modifier = Modifier
@@ -212,7 +213,9 @@ fun WeightScreenContent(
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
 
-            userWeightViewModel.allWeights.observeForever { userWeights ->
+            userWeightViewModel.getUserByUid(auth!!.uid)
+
+            userWeightViewModel.getUserByUid.observeForever { userWeights ->
                 items(userWeights) { userWeight ->
                     Card(
                         modifier = Modifier
