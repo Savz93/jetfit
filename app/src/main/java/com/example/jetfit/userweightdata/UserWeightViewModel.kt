@@ -42,4 +42,8 @@ class UserWeightViewModel @Inject constructor(application: Application): ViewMod
         repository.deleteWeight(userWeight)
     }
 
+    fun deleteUserWeightDb() {
+        repository.deleteUserWeightDb()
+    }
+
 }

@@ -40,4 +40,10 @@ class UserWeightRepository(private val userWeightDao: UserWeightDao) {
         }
     }
 
+    fun deleteUserWeightDb() {
+        coroutineScope.launch(Dispatchers.IO) {
+            userWeightDao.deleteUserWeightDb()
+        }
+    }
+
 }

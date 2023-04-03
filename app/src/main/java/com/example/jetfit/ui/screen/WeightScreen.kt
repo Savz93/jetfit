@@ -1,7 +1,6 @@
 package com.example.jetfit.ui.screen
 
 import android.annotation.SuppressLint
-import android.widget.Toast
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -10,12 +9,10 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Outline
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -25,7 +22,6 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.jetfit.MainViewModel
-import com.example.jetfit.User
 import com.example.jetfit.ui.Colors
 import com.example.jetfit.userdata.UserViewModel
 import com.example.jetfit.userweightdata.UserWeight
@@ -95,6 +91,7 @@ fun addWeightAndDate(
         },
         confirmButton = {
             TextButton(onClick = {
+
                 userWeightViewModel
                     .insertUserWeight(
                         UserWeight(
@@ -103,8 +100,6 @@ fun addWeightAndDate(
                             weight = weight
                         )
                 )
-
-                Toast.makeText(context, "${userWeightViewModel.allWeights.value}", Toast.LENGTH_SHORT).show()
 
                 navController.navigate(Screen.WeightScreen.route)
             }) {
@@ -178,44 +173,6 @@ fun WeightScreenContent(
 ) {
 
     val context = LocalContext.current
-    val userWeights = userWeightViewModel.allWeights.value
-    val userWeightsDummyData = listOf(
-        UserWeight (
-            uid = "1",
-            date = "02/24/2023",
-            weight = "165"
-        ),
-        UserWeight (
-            uid = "2",
-            date = "02/25/2023",
-            weight = "166"
-        ),
-        UserWeight (
-            uid = "3",
-            date = "02/28/2023",
-            weight = "170"
-        ),
-        UserWeight (
-            uid = "4",
-            date = "03/02/2023",
-            weight = "165"
-        ),
-        UserWeight (
-            uid = "5",
-            date = "03/05/2023",
-            weight = "171"
-        ),
-        UserWeight (
-            uid = "6",
-            date = "03/15/2023",
-            weight = "168"
-        ),
-        UserWeight (
-            uid = "7",
-            date = "03/24/2023",
-            weight = "162"
-        ),
-    )
 
     Column(
         modifier = Modifier
@@ -255,38 +212,37 @@ fun WeightScreenContent(
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
 
-            Toast.makeText(context, "$userWeights", Toast.LENGTH_SHORT).show()
-
-            items(userWeights ?: userWeightsDummyData) {
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(60.dp),
-                    backgroundColor = Color.LightGray,
-                    elevation = 8.dp,
-                    shape = RoundedCornerShape(12.dp)
-                ) {
-
-                    Row(
-                        modifier = Modifier,
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween
+            userWeightViewModel.allWeights.observeForever { userWeights ->
+                items(userWeights) { userWeight ->
+                    Card(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(60.dp),
+                        backgroundColor = Color.LightGray,
+                        elevation = 8.dp,
+                        shape = RoundedCornerShape(12.dp)
                     ) {
-                        Text(
-                            modifier = Modifier.padding(start = 16.dp),
-                            text = it.date,
-                            fontSize = 24.sp,
-                        )
 
-                        Text(
-                            modifier = Modifier.padding(end = 16.dp),
-                            text = it.weight,
-                            fontSize = 20.sp
-                        )
+                        Row(
+                            modifier = Modifier,
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Text(
+                                modifier = Modifier.padding(start = 16.dp),
+                                text = userWeight.date,
+                                fontSize = 24.sp,
+                            )
+
+                            Text(
+                                modifier = Modifier.padding(end = 16.dp),
+                                text = userWeight.weight,
+                                fontSize = 20.sp
+                            )
+                        }
                     }
                 }
             }
-
 
         }
     }

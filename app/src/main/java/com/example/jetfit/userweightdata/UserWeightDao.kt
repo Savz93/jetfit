@@ -17,6 +17,9 @@ interface UserWeightDao {
     @Query("SELECT * FROM user_weight WHERE uid = :uid")
     fun getUserByUid(uid: String): List<UserWeight>
 
+    @Query("DELETE FROM user_weight")
+    fun deleteUserWeightDb()
+
     @Insert
     suspend fun insertWeight(userWeight: UserWeight)
 
@@ -25,4 +28,6 @@ interface UserWeightDao {
 
     @Delete
     fun deleteWeight(userWeight: UserWeight)
+
+
 }
