@@ -12,7 +12,6 @@ import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material.icons.rounded.CheckCircle
 import androidx.compose.runtime.*
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -32,10 +31,12 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
-import com.example.jetfit.User
 import com.example.jetfit.ui.Colors
 import com.example.jetfit.userdata.UserViewModel
+import com.example.jetfit.userdata.UserDataFireStore
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.CollectionReference
+import com.google.firebase.firestore.FirebaseFirestore
 
 
 @Composable
@@ -54,6 +55,8 @@ fun CreateAccountScreen(
     val context = LocalContext.current
 
     val auth: FirebaseAuth = FirebaseAuth.getInstance()
+    val db: FirebaseFirestore = FirebaseFirestore.getInstance()
+    val userDB: CollectionReference = db.collection("Users")
 
     val focusManager = LocalFocusManager.current
 
@@ -296,16 +299,31 @@ fun CreateAccountScreen(
                         .addOnCompleteListener { task ->
                             if (task.isSuccessful) {
 
-                                val currentUser = User (
+                                val currentUser = UserDataFireStore (
                                     firstName = firstName,
                                     lastName = lastName,
                                     uid = auth.uid!!,
                                     email = email
                                 )
 
-                                viewModel.addUser(currentUser)
+                                userDB.add(currentUser).addOnSuccessListener {
+                                    Toast.makeText(
+                                        context,
+                                        "User has been added to firestore",
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                }.addOnFailureListener { e ->
+                                    Log.i("TAG", "Failed to add user to firestore \n$e")
+                                    Toast.makeText(
+                                        context,
+                                        "Fail to add user \n$e", Toast.LENGTH_SHORT
+                                    ).show()
 
-                                navController.navigate(Screen.HomeScreen.withArgs(currentUser.firstName))
+                                }
+
+                                navController.navigate(Screen.HomeScreen.route)
+
+
                                 Log.d("TAG", "createUserWithEmail:success")
                             } else {
                                 Log.w("TAG", task.exception.toString())

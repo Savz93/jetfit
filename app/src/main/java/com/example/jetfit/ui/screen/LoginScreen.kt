@@ -38,9 +38,11 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.jetfit.ui.Colors
+import com.example.jetfit.userdata.UserDataFireStore
 import com.example.jetfit.userdata.UserViewModel
 import com.google.android.gms.common.api.internal.LifecycleActivity
 import com.google.firebase.auth.ktx.auth
+import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.ktx.Firebase
 import dagger.hilt.android.ViewModelLifecycle
 import kotlinx.coroutines.*
@@ -57,6 +59,7 @@ fun LoginScreen(
     var password by remember { mutableStateOf("") }
     var passwordVisible by rememberSaveable { mutableStateOf(false) }
     val auth = Firebase.auth
+    val db = FirebaseFirestore.getInstance()
     val context = LocalContext.current
 
     val coroutineScope = rememberCoroutineScope()
@@ -193,14 +196,17 @@ fun LoginScreen(
             onClick = {
                 auth.signInWithEmailAndPassword(email, password).addOnCompleteListener {
                     if (it.isSuccessful) {
-                        val currentUser = auth.currentUser
+//                        val currentUser = auth.currentUser
+                        navController.navigate(Screen.HomeScreen.route)
 
-                        viewModel.findUserByUid(currentUser!!.uid)
-
-                        viewModel.findUser.observeForever { user ->
-                            navController.navigate(Screen.HomeScreen.withArgs(user.firstName))
-                        }
-
+//                        var firstName = ""
+//
+//
+//                        viewModel.findUserByUid(currentUser!!.uid)
+//
+//                        viewModel.findUser.observeForever { user ->
+//                            navController.navigate(Screen.HomeScreen.withArgs(user.firstName))
+//                        }
                     } else {
                         Log.w("TAG", it.exception.toString())
                         Toast.makeText(context, "This email and password do not exist", Toast.LENGTH_SHORT).show()

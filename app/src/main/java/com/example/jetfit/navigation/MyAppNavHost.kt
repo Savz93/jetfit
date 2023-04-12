@@ -36,19 +36,9 @@ fun MyAppNavHost(
             val userViewModel = hiltViewModel<UserViewModel>()
             CreateAccountScreen(navController, userViewModel)
         }
-        composable(
-            route = Screen.HomeScreen.route  + "/{user}",
-            arguments = listOf(
-                navArgument("user") {
-                type = NavType.StringType
-                nullable = true
-                }
-            )
-        ) {  user ->
-            HomeScreen(
-                user = user.arguments?.getString("user"),
-                navController = navController
-            ) }
+        composable(route = Screen.HomeScreen.route) {
+            HomeScreen(navController = navController)
+        }
         composable(Screen.WeightScreen.route) {
             val userViewModel = hiltViewModel<UserViewModel>()
             val userWeightViewModel = hiltViewModel<UserWeightViewModel>()

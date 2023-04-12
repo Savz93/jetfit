@@ -1,6 +1,7 @@
 package com.example.jetfit.ui.screen
 
 import android.annotation.SuppressLint
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -8,8 +9,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Rect
@@ -30,13 +30,18 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.jetfit.R
 import com.example.jetfit.ui.Colors
+import com.example.jetfit.userdata.UserDataFireStore
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.ktx.toObject
+import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.launch
 
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 @Composable
 fun HomeScreen(
-    user: String?,
-    navController: NavController) {
+    navController: NavController
+) {
 
     val scaffoldState = rememberScaffoldState(
     rememberDrawerState(
@@ -66,7 +71,7 @@ fun HomeScreen(
                 }
             }
         )},
-        content = { HomeScreenContent(user = user, navController = navController) },
+        content = { HomeScreenContent(navController = navController) },
         bottomBar = { BottomAppBar(backgroundColor = Colors.middleBlue) {
 
         } },
@@ -152,9 +157,26 @@ fun HomeScreenTitle() {
 }
 @Composable
 fun HomeScreenContent(
-    user: String?,
     navController: NavController
 ) {
+
+    val db: FirebaseFirestore = FirebaseFirestore.getInstance()
+    val auth = Firebase.auth.currentUser
+    var firstName by remember { mutableStateOf("") }
+
+    db.collection("Users").get().addOnSuccessListener { result ->
+        for (document in result) {
+            val users = document.toObject(UserDataFireStore::class.java)
+            if (users.uid == auth!!.uid) {
+                Log.i("TAG", firstName)
+                firstName = users.firstName.toString()
+                Log.i("TAG", firstName)
+            }
+            Log.i("TAG", "${document.id} => ${document.data}")
+        }
+    }.addOnFailureListener { e ->
+        Log.w("TAG", "Error getting documents: $e")
+    }
 
     ConstraintLayout(
         modifier = Modifier
@@ -173,7 +195,7 @@ fun HomeScreenContent(
                 start.linkTo(parent.start)
                 end.linkTo(parent.end)
             },
-            text = "Hello, $user",
+            text = "Hello, $firstName",
             fontSize = 24.sp,
             color = Color.Black
         )
@@ -337,5 +359,5 @@ fun customShape() =  object : Shape {
 @Preview(showBackground = true)
 @Composable
 fun HomeScreenPreview() {
-    HomeScreen("Adam", rememberNavController())
+    HomeScreen( rememberNavController())
 }
