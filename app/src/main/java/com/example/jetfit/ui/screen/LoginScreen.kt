@@ -14,15 +14,12 @@ import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.*
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -33,26 +30,19 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
-import androidx.core.view.WindowCompat
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.jetfit.ui.Colors
-import com.example.jetfit.userdata.UserDataFireStore
-import com.example.jetfit.userdata.UserViewModel
-import com.google.android.gms.common.api.internal.LifecycleActivity
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.ktx.Firebase
-import dagger.hilt.android.ViewModelLifecycle
 import kotlinx.coroutines.*
 
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun LoginScreen(
-    navController: NavController,
-    viewModel: UserViewModel
+    navController: NavController
 ) {
 
     var email by remember { mutableStateOf("") }
@@ -241,6 +231,6 @@ fun LoginScreen(
 @Preview(showBackground = true)
 @Composable
 fun LoginScreenPreview() {
-    LoginScreen(rememberNavController(), viewModel = viewModel())
+    LoginScreen(rememberNavController())
 }
 

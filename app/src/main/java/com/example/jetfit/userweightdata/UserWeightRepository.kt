@@ -2,7 +2,6 @@ package com.example.jetfit.userweightdata
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import com.example.jetfit.User
 import kotlinx.coroutines.*
 
 class UserWeightRepository(private val userWeightDao: UserWeightDao) {

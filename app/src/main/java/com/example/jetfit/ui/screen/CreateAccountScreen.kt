@@ -32,7 +32,6 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.jetfit.ui.Colors
-import com.example.jetfit.userdata.UserViewModel
 import com.example.jetfit.userdata.UserDataFireStore
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.CollectionReference
@@ -41,8 +40,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 
 @Composable
 fun CreateAccountScreen(
-    navController: NavController,
-    viewModel: UserViewModel
+    navController: NavController
 ) {
 
     var firstName by remember { mutableStateOf("") }
@@ -287,8 +285,6 @@ fun CreateAccountScreen(
 
 //        Spacer(modifier = Modifier.height(40.dp))
 
-        val userViewModel: UserViewModel = viewModel()
-
         // Create Account button
         OutlinedButton(
             onClick = {
@@ -322,8 +318,6 @@ fun CreateAccountScreen(
                                 }
 
                                 navController.navigate(Screen.HomeScreen.route)
-
-
                                 Log.d("TAG", "createUserWithEmail:success")
                             } else {
                                 Log.w("TAG", task.exception.toString())
@@ -356,5 +350,5 @@ fun CreateAccountScreen(
 @Preview(showBackground = true)
 @Composable
 fun PreviewCreateAccountScreen() {
-    CreateAccountScreen(rememberNavController(), viewModel())
+    CreateAccountScreen(rememberNavController())
 }

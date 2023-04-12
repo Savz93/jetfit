@@ -4,9 +4,6 @@ import android.app.Application
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.example.jetfit.User
-import com.example.jetfit.userdata.UserRepository
-import com.example.jetfit.userdata.UserRoomDatabase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 

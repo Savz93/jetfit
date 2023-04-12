@@ -31,6 +31,7 @@ import androidx.navigation.compose.rememberNavController
 import com.example.jetfit.R
 import com.example.jetfit.ui.Colors
 import com.example.jetfit.userdata.UserDataFireStore
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.toObject
@@ -75,7 +76,7 @@ fun HomeScreen(
         bottomBar = { BottomAppBar(backgroundColor = Colors.middleBlue) {
 
         } },
-        drawerContent = { DrawerContentHomeScreen() },
+        drawerContent = { DrawerContentHomeScreen(navController) },
         drawerShape = customShape(),
         drawerBackgroundColor = Color.LightGray,
         drawerElevation = 8.dp,
@@ -84,11 +85,24 @@ fun HomeScreen(
 }
 
 @Composable
-fun DrawerContentHomeScreen() {
+fun DrawerContentHomeScreen(navController: NavController) {
+
+    val auth = FirebaseAuth.getInstance()
+
     Column(
         modifier = Modifier.padding(start = 12.dp)
     ) {
-        Spacer(modifier = Modifier.height(8.dp))
+
+        Row(
+            modifier = Modifier.padding(start = 32.dp),
+        ) {
+            Text(
+                text = "Menu",
+                fontWeight = FontWeight.Bold,
+                fontSize = 30.sp)
+        }
+
+        Spacer(modifier = Modifier.height(40.dp))
 
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -126,6 +140,10 @@ fun DrawerContentHomeScreen() {
         Spacer(modifier = Modifier.height(8.dp))
 
         Row(
+            modifier = Modifier.clickable {
+                auth.signOut()
+                navController.navigate(Screen.LoginScreen.route)
+            },
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Start
         ) {
@@ -145,7 +163,9 @@ fun DrawerContentHomeScreen() {
 @Composable
 fun HomeScreenTitle() {
     Row(
-        modifier = Modifier.fillMaxSize().padding(start = 90.dp),
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(start = 90.dp),
         horizontalArrangement = Arrangement.Start,
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -164,18 +184,20 @@ fun HomeScreenContent(
     val auth = Firebase.auth.currentUser
     var firstName by remember { mutableStateOf("") }
 
-    db.collection("Users").get().addOnSuccessListener { result ->
-        for (document in result) {
-            val users = document.toObject(UserDataFireStore::class.java)
-            if (users.uid == auth!!.uid) {
-                Log.i("TAG", firstName)
-                firstName = users.firstName.toString()
-                Log.i("TAG", firstName)
+    if (auth != null) {
+        db.collection("Users").get().addOnSuccessListener { result ->
+            for (document in result) {
+                val users = document.toObject(UserDataFireStore::class.java)
+                if (users.uid == auth.uid) {
+                    Log.i("TAG", firstName)
+                    firstName = users.firstName.toString()
+                    Log.i("TAG", firstName)
+                }
+                Log.i("TAG", "${document.id} => ${document.data}")
             }
-            Log.i("TAG", "${document.id} => ${document.data}")
+        }.addOnFailureListener { e ->
+            Log.w("TAG", "Error getting documents: $e")
         }
-    }.addOnFailureListener { e ->
-        Log.w("TAG", "Error getting documents: $e")
     }
 
     ConstraintLayout(
@@ -351,7 +373,7 @@ fun customShape() =  object : Shape {
         layoutDirection: LayoutDirection,
         density: Density
     ): Outline {
-        return Outline.Rectangle(Rect(0f,0f,500f, 500f))
+        return Outline.Rectangle(Rect(0f,0f,500f, 600f))
     }
 
 }

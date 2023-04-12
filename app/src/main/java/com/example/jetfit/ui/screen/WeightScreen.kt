@@ -23,7 +23,6 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.jetfit.MainViewModel
 import com.example.jetfit.ui.Colors
-import com.example.jetfit.userdata.UserViewModel
 import com.example.jetfit.userweightdata.UserWeight
 import com.example.jetfit.userweightdata.UserWeightViewModel
 import com.google.firebase.auth.ktx.auth
@@ -33,7 +32,6 @@ import com.google.firebase.ktx.Firebase
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 @Composable
 fun WeightScreen(
-    userViewModel: UserViewModel,
     userWeightViewModel: UserWeightViewModel,
     mainViewModel: MainViewModel,
     navController: NavController
@@ -255,5 +253,5 @@ fun WeightScreenContent(
 @Preview(showBackground = true)
 @Composable
 fun WeightScreenPreview() {
-    WeightScreen(viewModel(), viewModel(), viewModel(), rememberNavController())
+    WeightScreen(viewModel(), viewModel(), rememberNavController())
 }
