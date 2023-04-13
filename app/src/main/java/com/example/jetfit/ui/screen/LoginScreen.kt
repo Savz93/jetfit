@@ -186,17 +186,7 @@ fun LoginScreen(
             onClick = {
                 auth.signInWithEmailAndPassword(email, password).addOnCompleteListener {
                     if (it.isSuccessful) {
-//                        val currentUser = auth.currentUser
                         navController.navigate(Screen.HomeScreen.route)
-
-//                        var firstName = ""
-//
-//
-//                        viewModel.findUserByUid(currentUser!!.uid)
-//
-//                        viewModel.findUser.observeForever { user ->
-//                            navController.navigate(Screen.HomeScreen.withArgs(user.firstName))
-//                        }
                     } else {
                         Log.w("TAG", it.exception.toString())
                         Toast.makeText(context, "This email and password do not exist", Toast.LENGTH_SHORT).show()

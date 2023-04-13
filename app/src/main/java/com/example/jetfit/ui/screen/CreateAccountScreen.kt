@@ -63,14 +63,14 @@ fun CreateAccountScreen(
             .fillMaxSize()
             .background(
                 Brush.linearGradient(
-                    listOf(Colors.middleBlue, Colors.darkBlue)
+                    listOf(Colors.middleBlue, Colors.middleBlue)
                 )
             ),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(24.dp)
     ) {
 
-        Spacer(modifier = Modifier.height(40.dp))
+        Spacer(modifier = Modifier.height(80.dp))
 
         // First Name
         OutlinedTextField(
@@ -314,7 +314,6 @@ fun CreateAccountScreen(
                                         context,
                                         "Fail to add user \n$e", Toast.LENGTH_SHORT
                                     ).show()
-
                                 }
 
                                 navController.navigate(Screen.HomeScreen.route)
@@ -337,9 +336,9 @@ fun CreateAccountScreen(
             },
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(start = 60.dp, end = 60.dp)
+                .padding(start = 60.dp, end = 60.dp, top = 32.dp)
                 .height(50.dp),
-            colors = ButtonDefaults.buttonColors(backgroundColor = Colors.middleBlue)
+            colors = ButtonDefaults.buttonColors(backgroundColor = Colors.darkBlue)
         ) {
             Text(text = "Create Account", color = Color.White, fontSize = 24.sp)
         }

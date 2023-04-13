@@ -7,7 +7,6 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.example.jetfit.MainViewModel
 import com.example.jetfit.ui.screen.*
-import com.example.jetfit.userweightdata.UserWeightViewModel
 
 @Composable
 fun MyAppNavHost(
@@ -22,14 +21,12 @@ fun MyAppNavHost(
         composable(Screen.CreateAccountScreen.route) { CreateAccountScreen(navController) }
         composable(Screen.HomeScreen.route) { HomeScreen(navController) }
         composable(Screen.WeightScreen.route) {
-            val userWeightViewModel = hiltViewModel<UserWeightViewModel>()
             val mainViewModel = hiltViewModel<MainViewModel>()
-            WeightScreen(userWeightViewModel, mainViewModel, navController)
+            WeightScreen(mainViewModel, navController)
         }
         composable(Screen.AlertDialogAddWeight.route) {
             val mainViewModel = hiltViewModel<MainViewModel>()
-            val userWeightViewModel = hiltViewModel<UserWeightViewModel>()
-            addWeightAndDate(mainViewModel, userWeightViewModel, navController)
+            addWeightAndDate(mainViewModel, navController)
         }
     }
 
