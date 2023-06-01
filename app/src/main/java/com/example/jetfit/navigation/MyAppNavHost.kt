@@ -22,6 +22,7 @@ fun MyAppNavHost(
         composable(Screen.CreateAccountScreen.route) { CreateAccountScreen(navController) }
         composable(Screen.HomeScreen.route) { HomeScreen(navController) }
         composable(Screen.WeightScreen.route) { WeightScreen() }
+        composable(Screen.SleepScreen.route) { SleepScreen()}
     }
 
 }

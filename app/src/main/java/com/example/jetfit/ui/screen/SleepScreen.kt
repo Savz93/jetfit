@@ -47,10 +47,11 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.jetfit.data.usersleep.UserSleep
+import com.example.jetfit.data.usersleep.UserSleepViewModel
 import com.example.jetfit.data.userweight.UserWeight
 import com.example.jetfit.data.userweight.UserWeightViewModel
 import com.google.firebase.auth.ktx.auth
@@ -61,9 +62,8 @@ import kotlinx.coroutines.withContext
 import java.util.Calendar
 import java.util.Date
 
-
 @Composable
-fun WeightScreen(userWeightViewModel: UserWeightViewModel = viewModel()) {
+fun SleepScreen(userSleepViewModel: UserSleepViewModel = viewModel()) {
     var showDialog by remember { mutableStateOf(false) }
 
     Scaffold (
@@ -78,13 +78,13 @@ fun WeightScreen(userWeightViewModel: UserWeightViewModel = viewModel()) {
             }
         }
     ) { innerPadding ->
-        var getAllUserWeights by rememberSaveable { mutableStateOf(listOf<UserWeight>()) }
+        var getAllUserSleep by rememberSaveable { mutableStateOf(listOf<UserSleep>()) }
         val auth = Firebase.auth.currentUser
 
         LaunchedEffect(Unit) {
             withContext(Dispatchers.Main) {
-                userWeightViewModel.getAllUserWeight.observeForever { userWeights ->
-                    getAllUserWeights = userWeights.filter { it.uid == auth!!.uid }
+                userSleepViewModel.getAllUserSleep.observeForever { userSleep ->
+                    getAllUserSleep = userSleep.filter { it.uid == auth!!.uid }
                 }
             }
         }
@@ -94,19 +94,19 @@ fun WeightScreen(userWeightViewModel: UserWeightViewModel = viewModel()) {
         ) {
             LazyColumn {
                 items(
-                    items = getAllUserWeights,
-                    key = { item: UserWeight -> item.id }
-                ) {userWeight ->
-                    WeightCard(
-                        userWeight = userWeight,
-                        deleteUserWeight = { userWeightViewModel.deleteUserWeight(userWeight) }
+                    items = getAllUserSleep,
+                    key = { item: UserSleep -> item.id }
+                ) { userSleep ->
+                    SleepCard(
+                        userSleep = userSleep,
+                        deleteUserSleep = { userSleepViewModel.deleteUserSleep(userSleep) }
                     )
                 }
             }
-            AddWeightAndDateDialog(
+            AddSleepAndDateDialog(
                 showDialog = showDialog,
                 onExitDialog = { showDialog = !showDialog },
-                userWeightViewModel = userWeightViewModel
+                userSleepViewModel = userSleepViewModel
             )
         }
 
@@ -114,13 +114,13 @@ fun WeightScreen(userWeightViewModel: UserWeightViewModel = viewModel()) {
 }
 
 @Composable
-fun AddWeightAndDateDialog(
+fun AddSleepAndDateDialog(
     showDialog: Boolean,
     onExitDialog: () -> Unit,
-    userWeightViewModel: UserWeightViewModel
+    userSleepViewModel: UserSleepViewModel
 ) {
 
-    var weight by remember { mutableStateOf("") }
+    var sleep by remember { mutableStateOf("") }
     val mContext = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
 
@@ -150,13 +150,13 @@ fun AddWeightAndDateDialog(
     if (showDialog) {
         AlertDialog(
             onDismissRequest = {
-                weight = ""
+                sleep = ""
                 mDate.value = ""
                 onExitDialog.invoke()
             },
             confirmButton = {
                 TextButton(onClick = {
-                    if (mDate.value == "" || weight == "") {
+                    if (mDate.value == "" || sleep == "") {
                         Toast.makeText(
                             mContext,
                             "One or more field were left empty",
@@ -165,16 +165,16 @@ fun AddWeightAndDateDialog(
                     } else {
                         coroutineScope.launch(Dispatchers.IO) {
                             if (auth != null) {
-                                userWeightViewModel.addUserWeight(
-                                    userWeight = UserWeight(
+                                userSleepViewModel.addUserSleep(
+                                    userSleep = UserSleep(
                                         uid = auth.uid,
                                         date = mDate.value,
-                                        weight = weight
+                                        hoursOfSleep = sleep
                                     )
                                 )
                             }
 
-                            weight = ""
+                            sleep = ""
                             mDate.value = ""
                         }
 
@@ -189,7 +189,7 @@ fun AddWeightAndDateDialog(
             dismissButton = {
                 TextButton(
                     onClick = {
-                        weight = ""
+                        sleep = ""
                         mDate.value = ""
                         onExitDialog.invoke()
                     }
@@ -221,8 +221,8 @@ fun AddWeightAndDateDialog(
                     }
 
                     OutlinedTextField(
-                        value = weight,
-                        onValueChange = { weight = it },
+                        value = sleep,
+                        onValueChange = { sleep = it },
                         singleLine = true,
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
                     )
@@ -234,10 +234,10 @@ fun AddWeightAndDateDialog(
 }
 
 @Composable
-fun WeightCard(
+fun SleepCard(
     modifier: Modifier = Modifier,
-    userWeight: UserWeight,
-    deleteUserWeight: () -> Unit
+    userSleep: UserSleep,
+    deleteUserSleep: () -> Unit
 ) {
     Card (
         modifier = modifier
@@ -247,19 +247,19 @@ fun WeightCard(
         elevation = CardDefaults.cardElevation(8.dp),
         colors = CardDefaults.cardColors(MaterialTheme.colorScheme.primaryContainer)
     ) {
-        WeightCardContent(
-            date = userWeight.date,
-            weight = userWeight.weight,
-            deleteUserWeight = deleteUserWeight
+        SleepCardContent(
+            date = userSleep.date,
+            sleep = userSleep.hoursOfSleep,
+            deleteUserSleep = deleteUserSleep
         )
     }
 }
 
 @Composable
-fun WeightCardContent(
+fun SleepCardContent(
     date: String,
-    weight: String,
-    deleteUserWeight: () -> Unit
+    sleep: String,
+    deleteUserSleep: () -> Unit
 ) {
 
     Row(
@@ -276,7 +276,7 @@ fun WeightCardContent(
                 color = MaterialTheme.colorScheme.primary
             )
             Text(
-                text = "Weight: $weight",
+                text = "Hours of Sleep: $sleep",
                 fontSize = 24.sp,
                 color = MaterialTheme.colorScheme.primary
             )
@@ -286,15 +286,9 @@ fun WeightCardContent(
             imageVector = Icons.Default.Delete,
             contentDescription = "Delete Icon",
             modifier = Modifier
-                .clickable { deleteUserWeight.invoke() }
+                .clickable { deleteUserSleep.invoke() }
                 .size(30.dp),
             tint = MaterialTheme.colorScheme.primary
         )
     }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun WeightScreenPreview() {
-    WeightScreen(viewModel())
 }
