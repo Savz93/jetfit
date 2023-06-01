@@ -189,11 +189,8 @@ fun HomeScreenContent(
             for (document in result) {
                 val users = document.toObject(UserDataFireStore::class.java)
                 if (users.uid == auth.uid) {
-                    Log.i("TAG", firstName)
                     firstName = users.firstName.toString()
-                    Log.i("TAG", firstName)
                 }
-                Log.i("TAG", "${document.id} => ${document.data}")
             }
         }.addOnFailureListener { e ->
             Log.w("TAG", "Error getting documents: $e")

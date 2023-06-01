@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -26,6 +27,9 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.ImeOptions
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
@@ -40,6 +44,7 @@ import com.example.jetfit.userdata.UserWeightDataFireStore
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.Query
 import com.google.firebase.ktx.Firebase
 import java.util.*
 import kotlin.random.Random
@@ -223,6 +228,7 @@ fun addWeightAndDate(
                         .height(60.dp),
                     value = weight,
                     onValueChange = { weight = it },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     colors = TextFieldDefaults.outlinedTextFieldColors(
                         cursorColor = Color.White,
                         textColor = Color.White,
@@ -360,100 +366,114 @@ fun WeightScreenContent() {
 
     val dates = remember { mutableStateListOf("") }
     val weights = remember { mutableStateListOf("") }
+    val datesAndWeights = remember { mutableMapOf<String, String>() }
 
     val context = LocalContext.current
     val auth = Firebase.auth.currentUser
     val db = FirebaseFirestore.getInstance()
 
-
     if (auth != null) {
-        db.collection("UserWeight").get().addOnSuccessListener { result ->
-            for (document in result) {
-                val userWeight = document.toObject(UserWeightDataFireStore::class.java)
-                if (userWeight.uid == auth.uid) {
-                    dates.add(userWeight.date)
-                    weights.add(userWeight.weight)
+        db.collection("UserWeight")
+            .orderBy("date", Query.Direction.DESCENDING)
+            .get()
+            .addOnSuccessListener { result ->
+
+                for (document in result) {
+                    val userWeight = document.toObject(UserWeightDataFireStore::class.java)
+                    if (userWeight.uid == auth.uid) {
+                        dates.add(userWeight.date)
+                        weights.add(userWeight.weight)
+
+                        datesAndWeights[userWeight.date] = userWeight.weight
+                    }
                 }
+
+                dates.removeAt(0)
+                weights.removeAt(0)
+
+            }.addOnFailureListener { e ->
+                Log.w("TAG", "Error getting documents: $e")
             }
-            dates.removeAt(0)
-            weights.removeAt(0)
-        }.addOnFailureListener { e ->
-            Log.w("TAG", "Error getting documents: $e")
-        }
     }
 
+
     val xValues = listOf(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12)
-    val yValues = listOf(100, 110, 120, 130, 140, 150, 160, 170, 180, 190)
-//    val points = listOf(150f,100f,250f,200f,330f,300f,90f,120f,285f,199f)
+    val yValues = listOf(100, 120, 140, 160, 180, 200, 220, 240, 260)
+    //    val points = listOf(150f,100f,250f,200f,330f,300f,90f,120f,285f,199f)
     val points = (0..11).map {
         var num = Random.nextInt(350)
-        if (num <= 50)
-            num += 100
+        if (num <= 100)
+            num += 50
         num.toFloat()
     }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(12.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(16.dp)
-    ) {
+    Log.i("TAG", "Points list: $points")
 
-        Card (
+    if (points.isNotEmpty()) {
+
+        Column(
             modifier = Modifier
-                .weight(0.5f)
-                .fillMaxSize(),
-            shape = RoundedCornerShape(16.dp),
-            backgroundColor = Color.LightGray,
-            elevation = 8.dp
-                ) {
-
-            Graph(
-                modifier = Modifier,
-                xValues = xValues,
-                yValues = yValues,
-                points = points,
-                paddingSpace = 24.dp,
-                verticalStep = 50
-            )
-        }
-
-        LazyColumn (
-            modifier = Modifier
-                .weight(0.5f)
                 .fillMaxSize()
-                .padding(bottom = 60.dp),
+                .padding(12.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
 
-            items(dates.size) {
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(60.dp),
-                    backgroundColor = Color.LightGray,
-                    elevation = 8.dp,
-                    shape = RoundedCornerShape(12.dp)
-                ) {
+            Card(
+                modifier = Modifier
+                    .weight(0.5f)
+                    .fillMaxSize(),
+                shape = RoundedCornerShape(16.dp),
+                backgroundColor = Color.LightGray,
+                elevation = 8.dp
+            ) {
 
-                    Row(
-                        modifier = Modifier,
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween
+                Graph(
+                    modifier = Modifier,
+                    xValues = xValues,
+                    yValues = yValues,
+                    points = points,
+                    paddingSpace = 24.dp,
+                    verticalStep = 50
+                )
+            }
+
+            LazyColumn(
+                modifier = Modifier
+                    .weight(0.5f)
+                    .fillMaxSize()
+                    .padding(bottom = 60.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+
+                items(dates.size) {
+                    Card(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(60.dp),
+                        backgroundColor = Color.LightGray,
+                        elevation = 8.dp,
+                        shape = RoundedCornerShape(12.dp)
                     ) {
-                        Text(
-                            modifier = Modifier.padding(start = 16.dp),
-                            text = dates[it],
-                            fontSize = 24.sp,
-                        )
 
-                        Text(
-                            modifier = Modifier.padding(end = 16.dp),
-                            text = weights[it],
-                            fontSize = 20.sp
-                        )
+                        Row(
+                            modifier = Modifier,
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Text(
+                                modifier = Modifier.padding(start = 16.dp),
+                                text = dates[it],
+                                fontSize = 24.sp,
+                            )
+
+                            Text(
+                                modifier = Modifier.padding(end = 16.dp),
+                                text = weights[it],
+                                fontSize = 20.sp
+                            )
+                        }
                     }
                 }
             }
