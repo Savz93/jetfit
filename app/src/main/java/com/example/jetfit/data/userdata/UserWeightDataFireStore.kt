@@ -1,4 +1,4 @@
-package com.example.jetfit.userdata
+package com.example.jetfit.data.userdata
 
 import androidx.room.PrimaryKey
 
