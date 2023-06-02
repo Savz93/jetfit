@@ -8,11 +8,13 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
@@ -47,10 +49,11 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.jetfit.data.userexercise.UserExercise
+import com.example.jetfit.data.userexercise.UserExerciseViewModel
 import com.example.jetfit.data.userweight.UserWeight
 import com.example.jetfit.data.userweight.UserWeightViewModel
 import com.google.firebase.auth.ktx.auth
@@ -61,9 +64,8 @@ import kotlinx.coroutines.withContext
 import java.util.Calendar
 import java.util.Date
 
-
 @Composable
-fun WeightScreen(userWeightViewModel: UserWeightViewModel = viewModel()) {
+fun ExerciseScreen(userExerciseViewModel: UserExerciseViewModel = viewModel()) {
     var showDialog by remember { mutableStateOf(false) }
 
     Scaffold (
@@ -78,13 +80,13 @@ fun WeightScreen(userWeightViewModel: UserWeightViewModel = viewModel()) {
             }
         }
     ) { innerPadding ->
-        var getAllUserWeights by rememberSaveable { mutableStateOf(listOf<UserWeight>()) }
+        var getAllUserExercise by rememberSaveable { mutableStateOf(listOf<UserExercise>()) }
         val auth = Firebase.auth.currentUser
 
         LaunchedEffect(Unit) {
             withContext(Dispatchers.Main) {
-                userWeightViewModel.getAllUserWeight.observeForever { userWeights ->
-                    getAllUserWeights = userWeights.filter { it.uid == auth!!.uid }
+                userExerciseViewModel.getAllUserExercise.observeForever { userExercise ->
+                    getAllUserExercise = userExercise.filter { it.uid == auth!!.uid }
                 }
             }
         }
@@ -94,19 +96,19 @@ fun WeightScreen(userWeightViewModel: UserWeightViewModel = viewModel()) {
         ) {
             LazyColumn(modifier = Modifier.padding(bottom = 80.dp)) {
                 items(
-                    items = getAllUserWeights,
-                    key = { item: UserWeight -> item.id }
-                ) {userWeight ->
-                    WeightCard(
-                        userWeight = userWeight,
-                        deleteUserWeight = { userWeightViewModel.deleteUserWeight(userWeight) }
+                    items = getAllUserExercise,
+                    key = { item: UserExercise -> item.id }
+                ) {userExercise ->
+                    UserExerciseCard(
+                        userExercise = userExercise,
+                        deleteUserExercise = { userExerciseViewModel.deleteUserExercise(userExercise) }
                     )
                 }
             }
-            AddWeightAndDateDialog(
+            AddExerciseDialog(
                 showDialog = showDialog,
                 onExitDialog = { showDialog = !showDialog },
-                userWeightViewModel = userWeightViewModel
+                userExerciseViewModel = userExerciseViewModel
             )
         }
 
@@ -114,12 +116,15 @@ fun WeightScreen(userWeightViewModel: UserWeightViewModel = viewModel()) {
 }
 
 @Composable
-fun AddWeightAndDateDialog(
+fun AddExerciseDialog(
     showDialog: Boolean,
     onExitDialog: () -> Unit,
-    userWeightViewModel: UserWeightViewModel
+    userExerciseViewModel: UserExerciseViewModel
 ) {
 
+    var exercise by remember { mutableStateOf("") }
+    var sets by remember { mutableStateOf("") }
+    var reps by remember { mutableStateOf("") }
     var weight by remember { mutableStateOf("") }
     val mContext = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
@@ -143,7 +148,7 @@ fun AddWeightAndDateDialog(
     val mDatePickerDialog = DatePickerDialog(
         mContext,
         { _: DatePicker, mYear: Int, mMonth: Int, mDayOfMonth: Int ->
-            mDate.value = "${mMonth+1}/$mDayOfMonth/$mYear"
+            mDate.value = "${mMonth + 1}/$mDayOfMonth/$mYear"
         }, mYear, mMonth, mDay
     )
 
@@ -165,15 +170,21 @@ fun AddWeightAndDateDialog(
                     } else {
                         coroutineScope.launch(Dispatchers.IO) {
                             if (auth != null) {
-                                userWeightViewModel.addUserWeight(
-                                    userWeight = UserWeight(
+                                userExerciseViewModel.addUserExercise(
+                                    userExercise = UserExercise(
                                         uid = auth.uid,
+                                        exercise = exercise,
                                         date = mDate.value,
+                                        reps = reps,
+                                        sets = sets,
                                         weight = weight
                                     )
                                 )
                             }
 
+                            exercise = ""
+                            sets = ""
+                            reps = ""
                             weight = ""
                             mDate.value = ""
                         }
@@ -189,6 +200,9 @@ fun AddWeightAndDateDialog(
             dismissButton = {
                 TextButton(
                     onClick = {
+                        exercise = ""
+                        sets = ""
+                        reps = ""
                         weight = ""
                         mDate.value = ""
                         onExitDialog.invoke()
@@ -199,6 +213,17 @@ fun AddWeightAndDateDialog(
             },
             text = {
                 Column(modifier = Modifier.fillMaxWidth()) {
+
+                    OutlinedTextField(
+                        value = exercise,
+                        onValueChange = { exercise = it },
+                        singleLine = true,
+                        placeholder = { Text(text = "exercise") },
+                        label = { Text(text = "exercise") }
+                    )
+
+                    Spacer(modifier = Modifier.height(12.dp))
+
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -221,11 +246,33 @@ fun AddWeightAndDateDialog(
                     }
 
                     OutlinedTextField(
+                        value = sets,
+                        onValueChange = { sets = it },
+                        singleLine = true,
+                        placeholder = { Text(text = "number of sets") },
+                        label = { Text(text = "sets") },
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                    )
+
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    OutlinedTextField(
+                        value = reps,
+                        onValueChange = { reps = it },
+                        singleLine = true,
+                        placeholder = { Text(text = "number of reps") },
+                        label = { Text(text = "reps") },
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                    )
+
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    OutlinedTextField(
                         value = weight,
                         onValueChange = { weight = it },
                         singleLine = true,
-                        label = { Text(text = "weight") },
                         placeholder = { Text(text = "weight") },
+                        label = { Text(text = "weight") },
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
                     )
 
@@ -236,34 +283,40 @@ fun AddWeightAndDateDialog(
 }
 
 @Composable
-fun WeightCard(
+fun UserExerciseCard(
     modifier: Modifier = Modifier,
-    userWeight: UserWeight,
-    deleteUserWeight: () -> Unit
+    userExercise: UserExercise,
+    deleteUserExercise: () -> Unit
 ) {
-    Card (
+    Card(
         modifier = modifier
             .padding(12.dp)
-            .height(80.dp),
+            .wrapContentHeight(),
         shape = RoundedCornerShape(8.dp),
         elevation = CardDefaults.cardElevation(8.dp),
         colors = CardDefaults.cardColors(MaterialTheme.colorScheme.primaryContainer)
     ) {
-        WeightCardContent(
-            date = userWeight.date,
-            weight = userWeight.weight,
-            deleteUserWeight = deleteUserWeight
+        ExerciseCardContent(
+            exercise = userExercise.exercise,
+            date = userExercise.date,
+            sets = userExercise.sets,
+            reps = userExercise.reps,
+            weight = userExercise.weight,
+            deleteUserExercise = deleteUserExercise
         )
+
     }
 }
 
 @Composable
-fun WeightCardContent(
+fun ExerciseCardContent(
+    exercise: String,
     date: String,
+    sets: String,
+    reps: String,
     weight: String,
-    deleteUserWeight: () -> Unit
+    deleteUserExercise: () -> Unit
 ) {
-
     Row(
         modifier = Modifier
             .fillMaxSize()
@@ -273,7 +326,23 @@ fun WeightCardContent(
     ) {
         Column() {
             Text(
+                text = "Exercise: $exercise",
+                fontSize = 24.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = MaterialTheme.colorScheme.primary
+            )
+            Text(
                 text = "Date: $date",
+                fontSize = 24.sp,
+                color = MaterialTheme.colorScheme.primary
+            )
+            Text(
+                text = "Sets: $sets",
+                fontSize = 24.sp,
+                color = MaterialTheme.colorScheme.primary
+            )
+            Text(
+                text = "reps: $reps",
                 fontSize = 24.sp,
                 color = MaterialTheme.colorScheme.primary
             )
@@ -288,15 +357,9 @@ fun WeightCardContent(
             imageVector = Icons.Default.Delete,
             contentDescription = "Delete Icon",
             modifier = Modifier
-                .clickable { deleteUserWeight.invoke() }
+                .clickable { deleteUserExercise.invoke() }
                 .size(30.dp),
             tint = MaterialTheme.colorScheme.primary
         )
     }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun WeightScreenPreview() {
-    WeightScreen(viewModel())
 }

@@ -264,6 +264,7 @@ fun HomeScreenContent(
 
                 Card(
                     modifier = Modifier
+                        .clickable { navController.navigate(Screen.ExerciseScreen.route) }
                         .width(180.dp)
                         .height(150.dp),
                     backgroundColor = Color.LightGray,

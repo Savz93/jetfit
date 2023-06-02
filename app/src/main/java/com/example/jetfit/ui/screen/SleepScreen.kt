@@ -92,7 +92,7 @@ fun SleepScreen(userSleepViewModel: UserSleepViewModel = viewModel()) {
         Box(modifier = Modifier
             .padding(bottom = innerPadding.calculateBottomPadding())
         ) {
-            LazyColumn {
+            LazyColumn(modifier = Modifier.padding(bottom = 80.dp)) {
                 items(
                     items = getAllUserSleep,
                     key = { item: UserSleep -> item.id }
@@ -224,6 +224,8 @@ fun AddSleepAndDateDialog(
                         value = sleep,
                         onValueChange = { sleep = it },
                         singleLine = true,
+                        label = { Text(text = "sleep") },
+                        placeholder = { Text(text = "sleep") },
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
                     )
 
