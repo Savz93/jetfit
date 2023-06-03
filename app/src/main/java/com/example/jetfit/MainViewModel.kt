@@ -21,22 +21,22 @@ class MainViewModel @Inject constructor(private val mealRepository: MealReposito
     val mealCategoryState: StateFlow<MealCategory>
         get() = _mealCategoryState
 
-    private val _mealByCategoryState = MutableStateFlow(mutableListOf<String>())
-    val mealByCategoryState: StateFlow<MutableList<String>>
+    private val _mealByCategoryState = MutableStateFlow(mutableListOf<MealByCategory>())
+    val mealByCategoryState: StateFlow<MutableList<MealByCategory>>
         get() = _mealByCategoryState
 
     init {
         viewModelScope.launch {
             val categories = mealRepository.getMealCategories()
             var mealsByCategory: MealByCat
-            val allMeals = mutableListOf<String>()
+            val allMeals = mutableListOf<MealByCategory>()
 
             categories.meals.forEach {
                 mealsByCategory = mealRepository
                     .getMealByCategory("https://www.themealdb.com/api/json/v1/1/filter.php?c=${it.strCategory}")
 
                 mealsByCategory.meals.forEach { meal ->
-                    allMeals.add(meal.strMeal)
+                    allMeals.add(meal)
                 }
             }
 

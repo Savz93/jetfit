@@ -1,15 +1,20 @@
 package com.example.jetfit.ui.screen
 
+import android.widget.Space
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -35,6 +40,8 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
+import com.bumptech.glide.integration.compose.GlideImage
 import com.example.jetfit.MainViewModel
 import com.example.jetfit.R
 import com.example.jetfit.data.model.MealByCat
@@ -60,7 +67,10 @@ fun NutritionScreen(mainViewModel: MainViewModel) {
         }
 
         items(mealByCategoryState) { meal ->
-            NutritionCard(meal = meal)
+            NutritionCard(
+                imageUrl = meal.strMealThumb,
+                meal = meal.strMeal
+            )
         }
 
 //        items(items = categoryState.meals) { mealName: MealName ->
@@ -70,17 +80,20 @@ fun NutritionScreen(mainViewModel: MainViewModel) {
     }
 }
 
+@OptIn(ExperimentalGlideComposeApi::class)
 @Composable
 fun NutritionCard(
     modifier: Modifier = Modifier,
-    meal: String
+    imageUrl: String,
+    meal: String,
+    mealId: String = ""
 ) {
     val favoriteIconClicked = remember { mutableStateOf(false) }
 
     Card(
         modifier = modifier
             .fillMaxWidth()
-            .wrapContentHeight()
+            .height(140.dp)
             .padding(16.dp),
         shape = RoundedCornerShape(8.dp),
         elevation = CardDefaults.cardElevation(8.dp),
@@ -93,21 +106,34 @@ fun NutritionCard(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Image(
-                painter = painterResource(id = R.drawable.jetfit_app_icon),
-                contentDescription = "Meal Image",
+            Row(
                 modifier = Modifier
-                    .clip(RoundedCornerShape(8.dp))
-                    .background(color = Color.LightGray),
-                contentScale = ContentScale.Fit
-            )
+                    .wrapContentSize(),
+                horizontalArrangement = Arrangement.Start,
+                verticalAlignment = Alignment.Top
+            ) {
 
-            Text(
-                text = meal,
-                fontSize = 24.sp,
-                fontWeight = FontWeight.SemiBold,
-                color =  MaterialTheme.colorScheme.primary
-            )
+                GlideImage(
+                    model = imageUrl,
+                    contentDescription = "Meal Image",
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(color = Color.LightGray),
+                    contentScale = ContentScale.Fit
+                )
+                
+                Spacer(modifier = Modifier.width(8.dp))
+                
+                Text(
+                    modifier = Modifier
+                        .width(180.dp)
+                        .height(140.dp),
+                    text = meal,
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color =  MaterialTheme.colorScheme.primary
+                )
+            }
 
             Icon(
                 modifier = Modifier
