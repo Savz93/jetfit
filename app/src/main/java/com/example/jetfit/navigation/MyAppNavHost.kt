@@ -24,6 +24,10 @@ fun MyAppNavHost(
         composable(Screen.WeightScreen.route) { WeightScreen() }
         composable(Screen.SleepScreen.route) { SleepScreen()}
         composable(Screen.ExerciseScreen.route) { ExerciseScreen() }
+        composable(Screen.NutritionScreen.route) {
+            val mainViewModel = hiltViewModel<MainViewModel>()
+            NutritionScreen(mainViewModel)
+        }
     }
 
 }

@@ -232,6 +232,7 @@ fun HomeScreenContent(
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Card(
                     modifier = Modifier
+                        .clickable { navController.navigate(Screen.NutritionScreen.route) }
                         .width(180.dp)
                         .height(150.dp),
                     backgroundColor = Color.LightGray,
