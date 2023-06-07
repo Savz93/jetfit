@@ -1,12 +1,12 @@
 package com.example.jetfit.ui.screen
 
-import android.widget.Space
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -19,63 +19,159 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
 import com.example.jetfit.MainViewModel
-import com.example.jetfit.R
-import com.example.jetfit.data.model.MealByCat
 import com.example.jetfit.data.model.MealByCategory
-import com.example.jetfit.data.model.MealName
+import kotlinx.coroutines.flow.filter
 
 @Composable
 fun NutritionScreen(mainViewModel: MainViewModel) {
-    val categoryState by mainViewModel.mealCategoryState.collectAsState()
     val mealByCategoryState by mainViewModel.mealByCategoryState.collectAsState()
+    var meals by remember { mutableStateOf(emptyList<MealByCategory>()) }
+    var search by remember { mutableStateOf("") }
+    var allCardIsActive by remember { mutableStateOf(true) }
 
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
             .padding(bottom = 80.dp),
-        verticalArrangement = Arrangement.Center,
+        verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+
+        item {
+            if (mealByCategoryState.isNotEmpty()) {
+                OutlinedTextField(
+                    modifier = Modifier
+                        .padding(start = 16.dp, end = 16.dp, top = 24.dp, bottom = 16.dp)
+                        .fillMaxWidth()
+                        .height(60.dp),
+                    value = search,
+                    onValueChange = { search = it },
+                    singleLine = true,
+                    leadingIcon = {
+                        Icon(
+                            imageVector = Icons.Default.Search,
+                            contentDescription = "Search Icon"
+                        )
+                    }
+                )
+            }
+        }
+
+        item {
+            if (mealByCategoryState.isNotEmpty()) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(80.dp)
+                        .padding(horizontal = 16.dp, vertical = 8.dp),
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+
+                    Card(
+                        modifier = Modifier
+                            .weight(0.5f)
+                            .fillMaxHeight()
+                            .clickable {
+                                allCardIsActive = true
+                            },
+                        colors =
+                        if (allCardIsActive)
+                            CardDefaults.cardColors(containerColor = Color.DarkGray, contentColor = Color.White)
+                        else
+                            CardDefaults.cardColors(containerColor = Color.LightGray, contentColor = Color.Black),
+                        shape = RoundedCornerShape(0.dp)
+                    ) {
+                        Column(
+                            modifier = Modifier.fillMaxSize(),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.Center
+                        ) {
+                            Text(
+                                text = "All",
+                                fontSize = 24.sp,
+                                fontWeight = FontWeight.SemiBold
+                            )
+                        }
+                    }
+
+                    Card(
+                        modifier = Modifier
+                            .weight(0.5f)
+                            .fillMaxHeight()
+                            .clickable {
+                                allCardIsActive = false
+                            },
+                        colors =
+                        if (allCardIsActive)
+                            CardDefaults.cardColors(containerColor = Color.LightGray, contentColor = Color.Black)
+                        else
+                            CardDefaults.cardColors(containerColor = Color.DarkGray, contentColor = Color.White),
+                        shape = RoundedCornerShape(0.dp)
+                    ) {
+                        Column(
+                            modifier = Modifier.fillMaxSize(),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.Center
+                        ) {
+                            Text(
+                                text = "Favorites",
+                                fontSize = 24.sp,
+                                fontWeight = FontWeight.SemiBold
+                            )
+                        }
+                    }
+                }
+            }
+        }
 
         item {
             if (mealByCategoryState.isNullOrEmpty())
                 CircularProgressIndicator(modifier = Modifier.size(40.dp))
         }
 
-        items(mealByCategoryState) { meal ->
+        meals = if (search.isNotEmpty()) {
+            mainViewModel.searchForMeal(search, mealByCategoryState)
+        } else {
+            mealByCategoryState
+        }
+
+        items(meals) { meal ->
             NutritionCard(
                 imageUrl = meal.strMealThumb,
                 meal = meal.strMeal
             )
         }
-
-//        items(items = categoryState.meals) { mealName: MealName ->
-//            NutritionCard(category = mealName.strCategory)
-//        }
 
     }
 }

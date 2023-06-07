@@ -17,10 +17,6 @@ import javax.inject.Inject
 @HiltViewModel
 class MainViewModel @Inject constructor(private val mealRepository: MealRepository): ViewModel() {
 
-    private val _mealCategoryState = MutableStateFlow(MealCategory(emptyList()))
-    val mealCategoryState: StateFlow<MealCategory>
-        get() = _mealCategoryState
-
     private val _mealByCategoryState = MutableStateFlow(mutableListOf<MealByCategory>())
     val mealByCategoryState: StateFlow<MutableList<MealByCategory>>
         get() = _mealByCategoryState
@@ -33,16 +29,20 @@ class MainViewModel @Inject constructor(private val mealRepository: MealReposito
 
             categories.meals.forEach {
                 mealsByCategory = mealRepository
-                    .getMealByCategory("https://www.themealdb.com/api/json/v1/1/filter.php?c=${it.strCategory}")
+                    .getMealByCategory("${MealApiConstants.BASE_URL}${MealApiConstants.FILTER_BY_CATEGORY}${it.strCategory}")
 
                 mealsByCategory.meals.forEach { meal ->
                     allMeals.add(meal)
                 }
             }
 
-            _mealCategoryState.value = categories
             _mealByCategoryState.value = allMeals
         }
     }
 
+    fun searchForMeal(search: String, listOfMeals: List<MealByCategory>): List<MealByCategory> {
+        return listOfMeals.filter { it.strMeal.lowercase().contains(search.lowercase()) }
+    }
+
 }
+
