@@ -46,6 +46,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
 import com.example.jetfit.MainViewModel
@@ -53,7 +54,7 @@ import com.example.jetfit.data.model.MealByCategory
 import kotlinx.coroutines.flow.filter
 
 @Composable
-fun NutritionScreen(mainViewModel: MainViewModel) {
+fun NutritionScreen(mainViewModel: MainViewModel, navController: NavController) {
     val mealByCategoryState by mainViewModel.mealByCategoryState.collectAsState()
     var meals by remember { mutableStateOf(emptyList<MealByCategory>()) }
     var search by remember { mutableStateOf("") }
@@ -67,8 +68,8 @@ fun NutritionScreen(mainViewModel: MainViewModel) {
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
 
-        item {
-            if (mealByCategoryState.isNotEmpty()) {
+        if (mealByCategoryState.isNotEmpty()) {
+            item {
                 OutlinedTextField(
                     modifier = Modifier
                         .padding(start = 16.dp, end = 16.dp, top = 24.dp, bottom = 16.dp)
@@ -85,10 +86,8 @@ fun NutritionScreen(mainViewModel: MainViewModel) {
                     }
                 )
             }
-        }
 
-        item {
-            if (mealByCategoryState.isNotEmpty()) {
+            item {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -153,26 +152,26 @@ fun NutritionScreen(mainViewModel: MainViewModel) {
                     }
                 }
             }
-        }
 
-        item {
-            if (mealByCategoryState.isNullOrEmpty())
-                CircularProgressIndicator(modifier = Modifier.size(40.dp))
-        }
+            meals = if (search.isNotEmpty()) {
+                mainViewModel.searchForMeal(search, mealByCategoryState)
+            } else {
+                mealByCategoryState
+            }
 
-        meals = if (search.isNotEmpty()) {
-            mainViewModel.searchForMeal(search, mealByCategoryState)
+            items(meals) { meal ->
+                NutritionCard(
+                    imageUrl = meal.strMealThumb,
+                    meal = meal.strMeal,
+                    mealId = meal.idMeal,
+                    navController = navController
+                )
+            }
         } else {
-            mealByCategoryState
+            item {
+                    CircularProgressIndicator(modifier = Modifier.size(40.dp))
+            }
         }
-
-        items(meals) { meal ->
-            NutritionCard(
-                imageUrl = meal.strMealThumb,
-                meal = meal.strMeal
-            )
-        }
-
     }
 }
 
@@ -182,7 +181,8 @@ fun NutritionCard(
     modifier: Modifier = Modifier,
     imageUrl: String,
     meal: String,
-    mealId: String = ""
+    mealId: String = "",
+    navController: NavController
 ) {
     val favoriteIconClicked = remember { mutableStateOf(false) }
 
@@ -190,7 +190,9 @@ fun NutritionCard(
         modifier = modifier
             .fillMaxWidth()
             .height(140.dp)
-            .padding(16.dp),
+            .padding(16.dp)
+            .clickable {
+                navController.navigate("${Screen.NutritionDetailScreen.route}/${mealId}") },
         shape = RoundedCornerShape(8.dp),
         elevation = CardDefaults.cardElevation(8.dp),
         colors = CardDefaults.cardColors(MaterialTheme.colorScheme.primaryContainer)

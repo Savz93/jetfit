@@ -26,7 +26,11 @@ fun MyAppNavHost(
         composable(Screen.ExerciseScreen.route) { ExerciseScreen() }
         composable(Screen.NutritionScreen.route) {
             val mainViewModel = hiltViewModel<MainViewModel>()
-            NutritionScreen(mainViewModel)
+            NutritionScreen(mainViewModel, navController)
+        }
+        composable("${Screen.NutritionDetailScreen.route}/{id}") {
+            val mainViewModel = hiltViewModel<MainViewModel>()
+            NutritionDetailScreen(id = it.arguments?.getString("id"), mainViewModel =  mainViewModel)
         }
     }
 

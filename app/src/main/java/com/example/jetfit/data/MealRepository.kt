@@ -2,9 +2,8 @@ package com.example.jetfit.data
 
 import com.example.jetfit.data.mealapi.MealApi
 import com.example.jetfit.data.model.MealByCat
-import com.example.jetfit.data.model.MealByCategory
 import com.example.jetfit.data.model.MealCategory
-import retrofit2.Call
+import com.example.jetfit.data.model.MealsById
 import javax.inject.Inject
 
 class MealRepository @Inject constructor(
@@ -12,6 +11,10 @@ class MealRepository @Inject constructor(
 ) {
     suspend fun getMealCategories(): MealCategory {
         return mealApi.getMealCategories()
+    }
+
+    suspend fun getMealById(id: String): MealsById {
+        return mealApi.getMealById(id)
     }
 
     suspend fun getMealByCategory(mealCategory: String): MealByCat {
