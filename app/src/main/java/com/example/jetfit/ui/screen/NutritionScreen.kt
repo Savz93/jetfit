@@ -32,11 +32,13 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -46,17 +48,30 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
 import com.example.jetfit.MainViewModel
+import com.example.jetfit.data.favoritemeal.FavoriteMeal
+import com.example.jetfit.data.favoritemeal.FavoriteMealViewModel
 import com.example.jetfit.data.model.MealByCategory
+import com.example.jetfit.data.userexercise.UserExercise
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.ktx.Firebase
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.withContext
 
 @Composable
-fun NutritionScreen(mainViewModel: MainViewModel, navController: NavController) {
+fun NutritionScreen(
+    mainViewModel: MainViewModel,
+    favoriteMealViewModel: FavoriteMealViewModel = viewModel(),
+    navController: NavController,
+) {
     val mealByCategoryState by mainViewModel.mealByCategoryState.collectAsState()
     var meals by remember { mutableStateOf(emptyList<MealByCategory>()) }
+    var favoriteMeals by remember { mutableStateOf(emptyList<FavoriteMeal>()) }
     var search by remember { mutableStateOf("") }
     var allCardIsActive by remember { mutableStateOf(true) }
 
@@ -67,7 +82,6 @@ fun NutritionScreen(mainViewModel: MainViewModel, navController: NavController) 
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-
         if (mealByCategoryState.isNotEmpty()) {
             item {
                 OutlinedTextField(
@@ -83,11 +97,22 @@ fun NutritionScreen(mainViewModel: MainViewModel, navController: NavController) 
                             imageVector = Icons.Default.Search,
                             contentDescription = "Search Icon"
                         )
-                    }
+                    },
+                    label = { Text(text = "search") },
+                    placeholder = { Text(text = "search") }
                 )
             }
 
             item {
+                LaunchedEffect(Unit) {
+                    withContext(Dispatchers.Main) {
+                        favoriteMealViewModel.getAllFavoriteMeal.observeForever { favoriteMeal ->
+                            favoriteMeals = favoriteMeal
+                        }
+
+                    }
+                }
+
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -128,9 +153,7 @@ fun NutritionScreen(mainViewModel: MainViewModel, navController: NavController) 
                         modifier = Modifier
                             .weight(0.5f)
                             .fillMaxHeight()
-                            .clickable {
-                                allCardIsActive = false
-                            },
+                            .clickable { allCardIsActive = false },
                         colors =
                         if (allCardIsActive)
                             CardDefaults.cardColors(containerColor = Color.LightGray, contentColor = Color.Black)
@@ -159,13 +182,27 @@ fun NutritionScreen(mainViewModel: MainViewModel, navController: NavController) 
                 mealByCategoryState
             }
 
-            items(meals) { meal ->
-                NutritionCard(
-                    imageUrl = meal.strMealThumb,
-                    meal = meal.strMeal,
-                    mealId = meal.idMeal,
-                    navController = navController
-                )
+            if (allCardIsActive) {
+                items(meals) { meal ->
+                    NutritionCard(
+                        imageUrl = meal.strMealThumb,
+                        meal = meal.strMeal,
+                        mealId = meal.idMeal,
+                        navController = navController,
+                        favoriteMealViewModel = favoriteMealViewModel
+                    )
+                }
+            } else {
+                items(favoriteMeals) {favoriteMeal ->
+                    NutritionCard(
+                        imageUrl = favoriteMeal.strMealThumb,
+                        meal = favoriteMeal.strMeal,
+                        mealId = favoriteMeal.idMeal,
+                        navController = navController,
+                        favorite = favoriteMeal.favorite,
+                        favoriteMealViewModel = favoriteMealViewModel
+                    )
+                }
             }
         } else {
             item {
@@ -182,9 +219,21 @@ fun NutritionCard(
     imageUrl: String,
     meal: String,
     mealId: String = "",
-    navController: NavController
+    favorite: Boolean = false,
+    navController: NavController,
+    favoriteMealViewModel: FavoriteMealViewModel
 ) {
-    val favoriteIconClicked = remember { mutableStateOf(false) }
+    val favoriteClicked = rememberSaveable { mutableStateOf(false) }
+
+    LaunchedEffect(Unit) {
+        favoriteMealViewModel.getAllFavoriteMeal.observeForever {
+            for (favoriteMeal in it) {
+                if (favoriteMeal.idMeal == mealId) {
+                    favoriteClicked.value = true
+                }
+            }
+        }
+    }
 
     Card(
         modifier = modifier
@@ -192,11 +241,13 @@ fun NutritionCard(
             .height(140.dp)
             .padding(16.dp)
             .clickable {
-                navController.navigate("${Screen.NutritionDetailScreen.route}/${mealId}") },
+                navController.navigate("${Screen.NutritionDetailScreen.route}/${mealId}")
+            },
         shape = RoundedCornerShape(8.dp),
         elevation = CardDefaults.cardElevation(8.dp),
         colors = CardDefaults.cardColors(MaterialTheme.colorScheme.primaryContainer)
     ) {
+
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -237,16 +288,33 @@ fun NutritionCard(
                 modifier = Modifier
                     .padding(end = 16.dp)
                     .size(40.dp)
-                    .clickable { favoriteIconClicked.value = !favoriteIconClicked.value },
+                    .clickable {
+                        if (!favoriteClicked.value) {
+                            favoriteMealViewModel.addFavoriteMeal(
+                                FavoriteMeal(
+                                    strMeal = meal,
+                                    idMeal = mealId,
+                                    strMealThumb = imageUrl,
+                                    favorite = true
+                                )
+                            )
+                        } else {
+                            favoriteMealViewModel.deleteFavoriteMeal(
+                                FavoriteMeal(
+                                    strMeal = meal,
+                                    idMeal = mealId,
+                                    strMealThumb = imageUrl,
+                                    favorite = true
+                                )
+                            )
+                        }
+
+                        favoriteClicked.value = !favoriteClicked.value
+                    },
                 imageVector = Icons.Default.Star,
                 contentDescription = "Star Icon",
-                tint = if (favoriteIconClicked.value) Color.Yellow else Color.Gray
+                tint = if (favorite || favoriteClicked.value) Color.Yellow else Color.Gray
             )
         }
     }
-}
-
-@Composable
-fun NutritionCardContent() {
-
 }
